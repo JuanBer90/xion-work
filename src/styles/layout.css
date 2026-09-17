@@ -308,7 +308,7 @@ body[data-intro='loading'] .intro { opacity: 0; transform: translateY(0.75rem); 
 body[data-intro='loading'] .network-node { opacity: 0; transform: scale(0.2); }
 body[data-intro='loading'] .network-fragment { opacity: 0; transform: scale(0.6); transform-box: fill-box; transform-origin: center; }
 body[data-intro='loading'] .network-micro-dot { opacity: 0; transform: scale(0.3); }
-body[data-intro='loading'] .capabilities li { opacity: 0; transform: translateX(0.7rem); }
+body[data-intro='loading'] .capabilities li { opacity: 0; transform: translateY(0.625rem); }
 
 @media (max-width: 1050px) {
   .hero-nav { left: 47%; }

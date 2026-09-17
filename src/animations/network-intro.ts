@@ -136,11 +136,11 @@ export function initNetworkIntro(): Timeline | null {
       '.capabilities li',
       {
         opacity: { to: 1 },
-        translateX: { to: 0 },
-        duration: 440,
-        delay: stagger(85),
+        translateY: { to: 0 },
+        duration: 460,
+        delay: stagger(210, { from: 'first' }),
       },
-      2940,
+      1480,
     )
     .add(
       '[data-reveal="cta"]',
