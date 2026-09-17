@@ -123,6 +123,26 @@ export function initNetworkIntro(): Timeline | null {
       1480,
     )
     .add(
+      '[data-network-label="ideas"]',
+      { opacity: { to: 1 }, translateY: { to: 0 }, duration: 400 },
+      1080,
+    )
+    .add(
+      '[data-network-label="build"]',
+      { opacity: { to: 1 }, translateY: { to: 0 }, duration: 400 },
+      1490,
+    )
+    .add(
+      '[data-network-label="scale"]',
+      { opacity: { to: 1 }, translateY: { to: 0 }, duration: 400 },
+      1780,
+    )
+    .add(
+      '[data-network-label="integrative"]',
+      { opacity: { to: 1 }, translateY: { to: 0 }, duration: 400 },
+      2070,
+    )
+    .add(
       '[data-reveal="subhead"]',
       { opacity: { to: 1 }, translateY: { to: 0 }, duration: 560 },
       2360,
@@ -152,10 +172,16 @@ export function initNetworkIntro(): Timeline | null {
       {
         opacity: { to: 1 },
         scale: { to: 1 },
-        duration: 280,
-        delay: stagger(9, { grid: [17, 17], from: 'center' }),
+        duration: 320,
+        delay: stagger(80, {
+          grid: true,
+          from: 'center',
+          ease: 'outQuad',
+          jitter: 75,
+          seed: 29,
+        }),
       },
-      3500,
+      1480,
     )
     .add(
       '[data-reveal="scroll"]',
