@@ -1,5 +1,7 @@
 import { createTimeline, stagger, type Timeline } from 'animejs';
 
+import { startNetworkDepth } from '@/animations/network-depth';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function toneForPoint(x: number, y: number): string {
@@ -62,6 +64,8 @@ export function initNetworkIntro(): Timeline | null {
   const fragments = [...document.querySelectorAll<SVGPathElement>('.network-fragment')];
   const microDots = appendMicroDots();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let ambientDelay = 0;
+  let stopAmbientDepth: (() => void) | null = null;
 
   setPathLengths(paths);
   if (reducedMotion.matches) {
@@ -73,7 +77,12 @@ export function initNetworkIntro(): Timeline | null {
   const timeline = createTimeline({
     autoplay: false,
     defaults: { ease: 'outCubic' },
-    onComplete: setFinalState,
+    onComplete: () => {
+      setFinalState();
+      ambientDelay = window.setTimeout(() => {
+        if (!reducedMotion.matches) stopAmbientDepth = startNetworkDepth();
+      }, 650);
+    },
   });
 
   timeline
@@ -194,6 +203,8 @@ export function initNetworkIntro(): Timeline | null {
   reducedMotion.addEventListener('change', () => {
     if (!reducedMotion.matches) return;
     timeline.pause();
+    window.clearTimeout(ambientDelay);
+    stopAmbientDepth?.();
     setFinalState();
   });
 
