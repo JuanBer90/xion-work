@@ -29,7 +29,9 @@ body {
   }
 
   .hero.app-scene {
-    min-height: max(100dvh, 66rem);
+    min-height: 100dvh;
+    height: 100dvh;
+    max-height: 100dvh;
   }
 }
 
