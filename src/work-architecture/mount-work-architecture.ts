@@ -10,6 +10,12 @@ import type { MountedWorkArchitecture, WorkArchitectureDefinition } from './type
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+export type ResponsiveWorkArchitecture = {
+  getMounted: () => MountedWorkArchitecture;
+  onRemount: (listener: (mounted: MountedWorkArchitecture) => void) => () => void;
+  destroy: () => void;
+};
+
 export function mountWorkArchitecture<TId extends string>(
   container: HTMLElement,
   definition: WorkArchitectureDefinition<TId>,
@@ -123,5 +129,48 @@ export function mountWorkArchitecture<TId extends string>(
     ambientDots: ambient.ambientDots,
     ambientPaths: ambient.ambientPaths,
     linkDots,
+    destroy: () => {
+      if (container.contains(svg)) container.replaceChildren();
+      container.classList.remove('work-section__system--mobile');
+      container.style.removeProperty('--work-system-aspect');
+    },
+  };
+}
+
+/**
+ * Rebuilds an architecture only when its declared layout breakpoint changes.
+ * Consumers own any behavior attached to a mounted SVG through `onRemount`.
+ */
+export function mountResponsiveWorkArchitecture<TId extends string>(
+  container: HTMLElement,
+  definition: WorkArchitectureDefinition<TId>,
+): ResponsiveWorkArchitecture {
+  const mediaQuery = window.matchMedia(definition.mobileBreakpoint);
+  const listeners = new Set<(mounted: MountedWorkArchitecture) => void>();
+  let mounted = mountWorkArchitecture(container, definition);
+  let destroyed = false;
+
+  const remount = (): void => {
+    if (destroyed) return;
+    mounted.destroy();
+    mounted = mountWorkArchitecture(container, definition);
+    for (const listener of listeners) listener(mounted);
+  };
+
+  mediaQuery.addEventListener('change', remount);
+
+  return {
+    getMounted: () => mounted,
+    onRemount: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    destroy: () => {
+      if (destroyed) return;
+      destroyed = true;
+      mediaQuery.removeEventListener('change', remount);
+      listeners.clear();
+      mounted.destroy();
+    },
   };
 }

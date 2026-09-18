@@ -266,7 +266,7 @@ export const DEXSTOORE_ARCHITECTURE: WorkArchitectureDefinition<DexstooreNodeId>
       visual: scaleNodeVisual(NODE_VISUALS.whatsapp),
       mobileSupportLines: ['Twilio', 'Integration'],
       desktop: { x: 752, y: 618, labelX: 794, labelY: 614 },
-      mobile: { x: 290, y: 480, labelX: 280, labelY: 520, labelAnchor: 'start' },
+      mobile: { x: 290, y: 480, labelX: 304, labelY: 520, labelAnchor: 'start' },
     },
   ],
   connections: [

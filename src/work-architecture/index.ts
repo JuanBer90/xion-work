@@ -1,6 +1,10 @@
 export { mountAmbientNetworkLayer, type AmbientExclusionNode } from './ambient-network.ts';
 export { buildArchitectureNode, appendConnectionPathMicrodots } from './build-architecture-node.ts';
-export { mountWorkArchitecture } from './mount-work-architecture.ts';
+export {
+  mountResponsiveWorkArchitecture,
+  mountWorkArchitecture,
+  type ResponsiveWorkArchitecture,
+} from './mount-work-architecture.ts';
 export { resolveArchitectureNodes, resolveArchitectureNode, architectureNodeById } from './resolve-nodes.ts';
 export { architectureConnectionAnchors } from './connection-anchors.ts';
 export { architectureNodeReach } from './node-reach.ts';

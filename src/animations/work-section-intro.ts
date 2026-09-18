@@ -79,6 +79,8 @@ export type WorkSectionIntroController = {
   reset: () => void;
   /** Cancels any in-flight intro playback. */
   stop: () => void;
+  /** Rebinds the controller after its responsive architecture SVG is rebuilt. */
+  replaceSystem: (system: MountedWorkArchitecture) => void;
   /** Fades section out, then runs `onComplete` (typically `reset`). */
   fadeOut: (onComplete: () => void) => void;
   destroy: () => void;
@@ -101,6 +103,7 @@ export function createWorkSectionIntroController(
       play: () => revealWorkSection(section),
       reset: noop,
       stop: noop,
+      replaceSystem: () => revealWorkSection(section),
       fadeOut: (onComplete) => onComplete(),
       destroy: noop,
     };
@@ -108,6 +111,7 @@ export function createWorkSectionIntroController(
 
   let timeline: Timeline | null = null;
   let playFrame = 0;
+  let mountedSystem = system;
 
   const stop = (): void => {
     window.cancelAnimationFrame(playFrame);
@@ -122,7 +126,7 @@ export function createWorkSectionIntroController(
     stop();
     section.dataset.workState = 'loading';
     clearIntroInlineStyles(section);
-    preparePaths(system.paths);
+    preparePaths(mountedSystem.paths);
   };
 
   const buildTimeline = (): Timeline => {
@@ -147,32 +151,32 @@ export function createWorkSectionIntroController(
         introAt(0),
       )
       .add(
-        system.nodeGroups[0],
+        mountedSystem.nodeGroups[0],
         { opacity: { to: 1 }, scale: { to: 1 }, duration: 440 },
         introAt(260),
       )
       .add(
-        system.paths[0],
+        mountedSystem.paths[0],
         { strokeDashoffset: { to: 0 }, opacity: { to: 1 }, duration: 560 },
         introAt(450),
       )
       .add(
-        system.nodeGroups[1],
+        mountedSystem.nodeGroups[1],
         { opacity: { to: 1 }, scale: { to: 1 }, duration: 420 },
         introAt(610),
       )
       .add(
-        system.paths[1],
+        mountedSystem.paths[1],
         { strokeDashoffset: { to: 0 }, opacity: { to: 1 }, duration: 560 },
         introAt(730),
       )
       .add(
-        system.nodeGroups[2],
+        mountedSystem.nodeGroups[2],
         { opacity: { to: 1 }, scale: { to: 1 }, duration: 440 },
         introAt(880),
       )
       .add(
-        [system.paths[2], system.paths[3]],
+        [mountedSystem.paths[2], mountedSystem.paths[3]],
         {
           strokeDashoffset: { to: 0 },
           opacity: { to: 1 },
@@ -182,7 +186,7 @@ export function createWorkSectionIntroController(
         introAt(1040),
       )
       .add(
-        [system.nodeGroups[3], system.nodeGroups[4]],
+        [mountedSystem.nodeGroups[3], mountedSystem.nodeGroups[4]],
         {
           opacity: { to: 1 },
           scale: { to: 1 },
@@ -192,7 +196,7 @@ export function createWorkSectionIntroController(
         introAt(1230),
       )
       .add(
-        [system.paths[4], system.paths[5]],
+        [mountedSystem.paths[4], mountedSystem.paths[5]],
         {
           strokeDashoffset: { to: 0 },
           opacity: { to: 1 },
@@ -202,7 +206,7 @@ export function createWorkSectionIntroController(
         introAt(1440),
       )
       .add(
-        [system.nodeGroups[5], system.nodeGroups[6]],
+        [mountedSystem.nodeGroups[5], mountedSystem.nodeGroups[6]],
         {
           opacity: { to: 1 },
           scale: { to: 1 },
@@ -212,12 +216,12 @@ export function createWorkSectionIntroController(
         introAt(1620),
       )
       .add(
-        system.ambientGroup,
+        mountedSystem.ambientGroup,
         { opacity: { to: 1 }, duration: 460, ease: 'outQuad' },
         introAt(400),
       )
       .add(
-        system.linkDots,
+        mountedSystem.linkDots,
         {
           opacity: {
             to: (target: unknown) => {
@@ -275,6 +279,11 @@ export function createWorkSectionIntroController(
     play,
     reset,
     stop,
+    replaceSystem: (nextSystem) => {
+      stop();
+      mountedSystem = nextSystem;
+      reset();
+    },
     fadeOut,
     destroy: () => {
       stop();

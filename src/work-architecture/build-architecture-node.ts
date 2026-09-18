@@ -166,9 +166,6 @@ export function buildArchitectureNode<TId extends string>(
   hitRect.setAttribute('width', hit.width.toFixed(1));
   hitRect.setAttribute('height', hit.height.toFixed(1));
   hitRect.setAttribute('fill', 'transparent');
-  hitRect.setAttribute('tabindex', '0');
-  hitRect.setAttribute('role', 'button');
-  hitRect.setAttribute('aria-label', `${node.title}: ${node.support}`);
 
   const visual = document.createElementNS(SVG_NS, 'g');
   visual.setAttribute('class', 'work-node__visual');

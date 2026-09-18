@@ -109,4 +109,5 @@ export type MountedWorkArchitecture = {
   ambientDots: SVGCircleElement[];
   ambientPaths: SVGPathElement[];
   linkDots: SVGCircleElement[];
+  destroy: () => void;
 };

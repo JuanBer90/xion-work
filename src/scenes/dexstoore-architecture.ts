@@ -1,5 +1,9 @@
 import { resolveArchitectureNodes } from '@/work-architecture/resolve-nodes.ts';
-import { mountWorkArchitecture } from '@/work-architecture/mount-work-architecture.ts';
+import {
+  mountResponsiveWorkArchitecture,
+  mountWorkArchitecture,
+  type ResponsiveWorkArchitecture,
+} from '@/work-architecture/mount-work-architecture.ts';
 import type { MountedWorkArchitecture } from '@/work-architecture/types.ts';
 import type { ArchitectureTone, ResolvedArchitectureNode } from '@/work-architecture/types.ts';
 
@@ -28,4 +32,10 @@ export const MOBILE_AMBIENT_HUBS = DEXSTOORE_ARCHITECTURE.ambient.mobileHubs;
 
 export function mountDexstooreSystem(container: HTMLElement): MountedDexstooreSystem {
   return mountWorkArchitecture(container, DEXSTOORE_ARCHITECTURE);
+}
+
+export function mountResponsiveDexstooreSystem(
+  container: HTMLElement,
+): ResponsiveWorkArchitecture {
+  return mountResponsiveWorkArchitecture(container, DEXSTOORE_ARCHITECTURE);
 }

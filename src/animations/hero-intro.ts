@@ -1,4 +1,4 @@
-import { createTimeline, stagger, type Timeline } from 'animejs';
+import { createTimeline, stagger } from 'animejs';
 
 function setFinalState(): void {
   document.body.dataset.intro = 'complete';
@@ -7,14 +7,18 @@ function setFinalState(): void {
   }
 }
 
+export type HeroIntroController = {
+  destroy: () => void;
+};
+
 /** Preserves the hero interface reveal independently from its visualization renderer. */
-export function initHeroIntro(): Timeline | null {
+export function initHeroIntro(): HeroIntroController | null {
   if (!document.querySelector<HTMLElement>('.hero')) return null;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   if (reducedMotion.matches) {
     setFinalState();
-    return null;
+    return { destroy: () => undefined };
   }
 
   document.body.dataset.intro = 'loading';
@@ -62,12 +66,22 @@ export function initHeroIntro(): Timeline | null {
     );
 
   timeline.stretch(4_600);
-  window.requestAnimationFrame(() => timeline.play());
-  reducedMotion.addEventListener('change', () => {
+  let playFrame = window.requestAnimationFrame(() => timeline.play());
+  const onReducedMotionChange = (): void => {
     if (!reducedMotion.matches) return;
+    window.cancelAnimationFrame(playFrame);
+    playFrame = 0;
     timeline.pause();
     setFinalState();
-  });
+  };
+  reducedMotion.addEventListener('change', onReducedMotionChange);
 
-  return timeline;
+  return {
+    destroy: () => {
+      window.cancelAnimationFrame(playFrame);
+      reducedMotion.removeEventListener('change', onReducedMotionChange);
+      timeline.pause();
+      timeline.revert();
+    },
+  };
 }
