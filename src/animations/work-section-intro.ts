@@ -3,6 +3,15 @@ import { createTimeline, stagger, type Timeline } from 'animejs';
 import type { MountedWorkArchitecture } from '@/work-architecture/types';
 import { prefersReducedMotion } from '@/utils/motion';
 
+/** Scales timeline offsets so architecture intro starts sooner on scene enter. */
+const WORK_INTRO_TIME_SCALE = 0.62;
+
+const WORK_FADE_OUT_MS = 1060;
+
+function introAt(ms: number): number {
+  return Math.round(ms * WORK_INTRO_TIME_SCALE);
+}
+
 function preparePaths(paths: SVGPathElement[]): void {
   for (const path of paths) {
     const length = path.getTotalLength();
@@ -40,6 +49,7 @@ function revealWorkSection(section: HTMLElement): void {
 }
 
 function clearIntroInlineStyles(section: HTMLElement): void {
+  section.style.opacity = '';
   for (const el of section.querySelectorAll<HTMLElement>('[data-work-reveal], .work-tech')) {
     el.style.opacity = '';
     el.style.transform = '';
@@ -69,6 +79,8 @@ export type WorkSectionIntroController = {
   reset: () => void;
   /** Cancels any in-flight intro playback. */
   stop: () => void;
+  /** Fades section out, then runs `onComplete` (typically `reset`). */
+  fadeOut: (onComplete: () => void) => void;
   destroy: () => void;
 };
 
@@ -89,6 +101,7 @@ export function createWorkSectionIntroController(
       play: () => revealWorkSection(section),
       reset: noop,
       stop: noop,
+      fadeOut: (onComplete) => onComplete(),
       destroy: noop,
     };
   }
@@ -128,80 +141,80 @@ export function createWorkSectionIntroController(
         {
           opacity: { to: 1 },
           translateY: { to: 0 },
-          duration: 520,
-          delay: stagger(90, { from: 'first' }),
+          duration: 480,
+          delay: stagger(55, { from: 'first' }),
         },
-        0,
+        introAt(0),
       )
       .add(
         system.nodeGroups[0],
-        { opacity: { to: 1 }, scale: { to: 1 }, duration: 480 },
-        420,
+        { opacity: { to: 1 }, scale: { to: 1 }, duration: 440 },
+        introAt(260),
       )
       .add(
         system.paths[0],
-        { strokeDashoffset: { to: 0 }, opacity: { to: 1 }, duration: 620 },
-        720,
+        { strokeDashoffset: { to: 0 }, opacity: { to: 1 }, duration: 560 },
+        introAt(450),
       )
       .add(
         system.nodeGroups[1],
-        { opacity: { to: 1 }, scale: { to: 1 }, duration: 460 },
-        980,
+        { opacity: { to: 1 }, scale: { to: 1 }, duration: 420 },
+        introAt(610),
       )
       .add(
         system.paths[1],
-        { strokeDashoffset: { to: 0 }, opacity: { to: 1 }, duration: 620 },
-        1180,
+        { strokeDashoffset: { to: 0 }, opacity: { to: 1 }, duration: 560 },
+        introAt(730),
       )
       .add(
         system.nodeGroups[2],
-        { opacity: { to: 1 }, scale: { to: 1 }, duration: 480 },
-        1420,
+        { opacity: { to: 1 }, scale: { to: 1 }, duration: 440 },
+        introAt(880),
       )
       .add(
         [system.paths[2], system.paths[3]],
         {
           strokeDashoffset: { to: 0 },
           opacity: { to: 1 },
-          duration: 680,
-          delay: stagger(120),
+          duration: 620,
+          delay: stagger(75),
         },
-        1680,
+        introAt(1040),
       )
       .add(
         [system.nodeGroups[3], system.nodeGroups[4]],
         {
           opacity: { to: 1 },
           scale: { to: 1 },
-          duration: 460,
-          delay: stagger(140),
+          duration: 420,
+          delay: stagger(90),
         },
-        1980,
+        introAt(1230),
       )
       .add(
         [system.paths[4], system.paths[5]],
         {
           strokeDashoffset: { to: 0 },
           opacity: { to: 1 },
-          duration: 620,
-          delay: stagger(110),
+          duration: 560,
+          delay: stagger(70),
         },
-        2320,
+        introAt(1440),
       )
       .add(
         [system.nodeGroups[5], system.nodeGroups[6]],
         {
           opacity: { to: 1 },
           scale: { to: 1 },
-          duration: 440,
-          delay: stagger(120),
+          duration: 400,
+          delay: stagger(75),
         },
-        2620,
+        introAt(1620),
       )
       .add(
         system.ambientGroup,
-        { opacity: { to: 1 }, duration: 520, ease: 'outQuad' },
-        640,
+        { opacity: { to: 1 }, duration: 460, ease: 'outQuad' },
+        introAt(400),
       )
       .add(
         system.linkDots,
@@ -212,15 +225,15 @@ export function createWorkSectionIntroController(
               return Number(target.dataset.opacity ?? '0.3');
             },
           },
-          duration: 280,
-          delay: stagger(24),
+          duration: 260,
+          delay: stagger(16),
         },
-        2280,
+        introAt(1410),
       )
       .add(
         techItems,
-        { opacity: { to: 1 }, translateY: { to: 0 }, duration: 420, delay: stagger(60) },
-        2920,
+        { opacity: { to: 1 }, translateY: { to: 0 }, duration: 380, delay: stagger(40) },
+        introAt(1810),
       );
 
     return nextTimeline;
@@ -228,11 +241,32 @@ export function createWorkSectionIntroController(
 
   const play = (): void => {
     stop();
+    section.style.opacity = '';
     timeline = buildTimeline();
     playFrame = window.requestAnimationFrame(() => {
       playFrame = 0;
       timeline?.play();
     });
+  };
+
+  const fadeOut = (onComplete: () => void): void => {
+    stop();
+    if (section.dataset.workState === 'loading') {
+      onComplete();
+      return;
+    }
+
+    timeline = createTimeline({
+      autoplay: false,
+      defaults: { ease: 'inCubic' },
+      onComplete: () => {
+        timeline = null;
+        section.style.opacity = '';
+        onComplete();
+      },
+    });
+    timeline.add(section, { opacity: { to: 0 }, duration: WORK_FADE_OUT_MS }, 0);
+    timeline.play();
   };
 
   reset();
@@ -241,6 +275,7 @@ export function createWorkSectionIntroController(
     play,
     reset,
     stop,
+    fadeOut,
     destroy: () => {
       stop();
     },

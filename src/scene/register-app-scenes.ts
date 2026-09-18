@@ -15,8 +15,7 @@ function workSectionIntroLifecycle(intro: WorkSectionIntroController | null): Sc
       intro?.play();
     },
     leave: () => {
-      intro?.stop();
-      intro?.reset();
+      intro?.fadeOut(() => intro?.reset());
     },
     reset: () => {
       intro?.stop();

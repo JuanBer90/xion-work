@@ -1,3 +1,8 @@
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: auto;
+}
+
 body {
   scroll-snap-type: y mandatory;
 }
@@ -13,6 +18,16 @@ body {
 }
 
 @media (max-width: 760px) {
+  html,
+  body {
+    scroll-snap-type: none;
+  }
+
+  .app-scene {
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+
   .hero.app-scene {
     min-height: max(100dvh, 66rem);
   }
