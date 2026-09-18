@@ -32,7 +32,9 @@ function revealWorkSection(section: HTMLElement): void {
     el.style.opacity = '1';
     el.style.transform = '';
   }
-  for (const dot of section.querySelectorAll<SVGCircleElement>('.work-micro, .work-link-dot')) {
+  const ambient = section.querySelector<SVGGElement>('.work-system__ambient');
+  if (ambient) ambient.style.opacity = '1';
+  for (const dot of section.querySelectorAll<SVGCircleElement>('.work-link-dot')) {
     dot.style.opacity = dot.dataset.opacity ?? '0.2';
   }
 }
@@ -149,23 +151,28 @@ export function initWorkSectionIntro(
         2620,
       )
       .add(
-        [...system.ambientPaths, ...system.ambientDots, ...system.linkDots],
+        system.ambientGroup,
+        { opacity: { to: 1 }, duration: 520, ease: 'outQuad' },
+        640,
+      )
+      .add(
+        system.linkDots,
         {
           opacity: {
             to: (target: unknown) => {
-              if (!(target instanceof SVGElement)) return 0.08;
-              return Number(target.dataset.opacity ?? '0.08');
+              if (!(target instanceof SVGElement)) return 0.3;
+              return Number(target.dataset.opacity ?? '0.3');
             },
           },
-          duration: 520,
-          delay: stagger(12, { from: 'random' }),
+          duration: 280,
+          delay: stagger(24),
         },
-        2880,
+        2280,
       )
       .add(
         techItems,
         { opacity: { to: 1 }, translateY: { to: 0 }, duration: 420, delay: stagger(60) },
-        3060,
+        2920,
       );
 
     window.requestAnimationFrame(() => timeline.play());

@@ -1,14 +1,12 @@
-import type { WorkNodeId } from '@/scenes/dexstoore-architecture';
-
 function isWorkNodeHit(target: EventTarget | null): SVGRectElement | null {
   if (!(target instanceof Element)) return null;
   const hit = target.closest<SVGRectElement>('.work-node-hit');
   return hit ?? null;
 }
 
-function nodeIdFromHit(hit: SVGRectElement): WorkNodeId | null {
+function nodeIdFromHit(hit: SVGRectElement): string | null {
   const id = hit.closest<SVGGElement>('.work-node-group')?.dataset.workNode;
-  return (id as WorkNodeId | undefined) ?? null;
+  return id ?? null;
 }
 
 /** Scale emphasis for Dexstoore architecture items (visual + labels only). */
@@ -24,8 +22,8 @@ export function initWorkArchitectureInteraction(
       hit.parentElement?.querySelector<SVGGElement>('.work-node__interactive') ?? null,
   );
 
-  let hoveredId: WorkNodeId | null = null;
-  let focusedId: WorkNodeId | null = null;
+  let hoveredId: string | null = null;
+  let focusedId: string | null = null;
 
   const sync = (): void => {
     const activeId = hoveredId ?? focusedId;

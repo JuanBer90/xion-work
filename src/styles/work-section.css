@@ -321,9 +321,10 @@
   transform: scale(0.72);
 }
 
-.work-section[data-work-state='loading'] .work-micro,
-.work-section[data-work-state='loading'] .work-path--ambient,
-.work-section[data-work-state='loading'] .work-path--arc,
+.work-section[data-work-state='loading'] .work-system__ambient {
+  opacity: 0;
+}
+
 .work-section[data-work-state='loading'] .work-link-dot,
 .work-section[data-work-state='loading'] .work-node__particle {
   opacity: 0;
