@@ -1,8 +1,12 @@
-import { mountAmbientNetworkLayer } from './dexstoore-ambient-network.ts';
+import { MOBILE_AMBIENT_HUBS, mountAmbientNetworkLayer } from './dexstoore-ambient-network.ts';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const VIEW_WIDTH = 960;
 const VIEW_HEIGHT = 720;
+const MOBILE_VIEW_WIDTH = 420;
+const MOBILE_VIEW_BOTTOM_PAD = 64;
+const MOBILE_AMBIENT_BOTTOM_PAD = 24;
+const WORK_SYSTEM_MOBILE_BREAKPOINT = '(max-width: 760px)';
 
 export type WorkNodeId =
   | 'storefront'
@@ -41,6 +45,14 @@ function scaleNodeVisual(base: NodeVisualSpec): NodeVisualSpec {
   };
 }
 
+type NodeLayoutSpec = {
+  x: number;
+  y: number;
+  labelX: number;
+  labelY: number;
+  labelAnchor?: 'start' | 'end' | 'middle';
+};
+
 export type WorkNode = {
   id: WorkNodeId;
   tone: WorkTone;
@@ -50,6 +62,7 @@ export type WorkNode = {
   support: string;
   labelX: number;
   labelY: number;
+  labelAnchor?: 'start' | 'end' | 'middle';
   visual: NodeVisualSpec;
 };
 
@@ -127,85 +140,107 @@ const NODE_VISUALS: Record<WorkNodeId, NodeVisualSpec> = {
   },
 };
 
-export const DEXSTOORE_NODES: readonly WorkNode[] = [
-  {
-    id: 'storefront',
+const NODE_COPY: Record<
+  WorkNodeId,
+  Pick<WorkNode, 'tone' | 'title' | 'support' | 'visual'>
+> = {
+  storefront: {
     tone: 'orange',
-    x: 392,
-    y: 88,
     title: 'Storefront',
     support: 'Browse · Checkout · Purchase',
-    labelX: 434,
-    labelY: 84,
     visual: scaleNodeVisual(NODE_VISUALS.storefront),
   },
-  {
-    id: 'commerce-api',
+  'commerce-api': {
     tone: 'cyan',
-    x: 404,
-    y: 206,
     title: 'Commerce API',
     support: 'Products · Orders · Customers',
-    labelX: 446,
-    labelY: 202,
     visual: scaleNodeVisual(NODE_VISUALS['commerce-api']),
   },
-  {
-    id: 'order-engine',
+  'order-engine': {
     tone: 'violet',
-    x: 388,
-    y: 334,
     title: 'Order Engine',
     support: 'Processing · Assignment · Fulfillment',
-    labelX: 430,
-    labelY: 330,
     visual: scaleNodeVisual(NODE_VISUALS['order-engine']),
   },
-  {
-    id: 'operations',
+  operations: {
     tone: 'green',
-    x: 108,
-    y: 498,
     title: 'Operations',
     support: 'Manage · Support · Scale',
-    labelX: 150,
-    labelY: 494,
     visual: scaleNodeVisual(NODE_VISUALS.operations),
   },
-  {
-    id: 'fulfillment',
+  fulfillment: {
     tone: 'blue',
-    x: 648,
-    y: 486,
     title: 'Fulfillment',
     support: 'Automated Delivery',
-    labelX: 690,
-    labelY: 482,
     visual: scaleNodeVisual(NODE_VISUALS.fulfillment),
   },
-  {
-    id: 'email',
+  email: {
     tone: 'red',
-    x: 528,
-    y: 628,
     title: 'Email',
     support: 'Delivery · Receipts',
-    labelX: 570,
-    labelY: 624,
     visual: scaleNodeVisual(NODE_VISUALS.email),
   },
-  {
-    id: 'whatsapp',
+  whatsapp: {
     tone: 'yellow',
-    x: 752,
-    y: 618,
     title: 'WhatsApp',
     support: 'Twilio Integration',
-    labelX: 794,
-    labelY: 614,
     visual: scaleNodeVisual(NODE_VISUALS.whatsapp),
   },
-];
+};
+
+const DESKTOP_NODE_LAYOUT: Record<WorkNodeId, NodeLayoutSpec> = {
+  storefront: { x: 392, y: 88, labelX: 434, labelY: 84 },
+  'commerce-api': { x: 404, y: 206, labelX: 446, labelY: 202 },
+  'order-engine': { x: 388, y: 334, labelX: 430, labelY: 330 },
+  operations: { x: 108, y: 498, labelX: 150, labelY: 494 },
+  fulfillment: { x: 648, y: 486, labelX: 690, labelY: 482 },
+  email: { x: 528, y: 628, labelX: 570, labelY: 624 },
+  whatsapp: { x: 752, y: 618, labelX: 794, labelY: 614 },
+};
+
+/** ~50px screen shift at 390px viewport (420-unit viewBox). */
+const MOBILE_COMMERCE_API_SHIFT_X = Math.round(50 * (MOBILE_VIEW_WIDTH / 390));
+
+const MOBILE_NODE_LAYOUT: Record<WorkNodeId, NodeLayoutSpec> = {
+  storefront: {
+    x: 160,
+    y: 84,
+    labelX: 232,
+    labelY: 64,
+    labelAnchor: 'start',
+  },
+  'commerce-api': {
+    x: 165,
+    y: 182,
+    labelX:
+      156 +
+      NODE_COPY['commerce-api'].visual.spread * NODE_COPY['commerce-api'].visual.outerRingScale +
+      MOBILE_COMMERCE_API_SHIFT_X,
+    labelY: 162,
+    labelAnchor: 'start',
+  },
+  'order-engine': {
+    x: 160,
+    y: 280,
+    labelX: 234,
+    labelY: 271,
+    labelAnchor: 'start',
+  },
+  operations: { x: 90, y: 387, labelX: 50, labelY: 440, labelAnchor: 'start' },
+  fulfillment: { x: 220, y: 386, labelX: 270, labelY: 380, labelAnchor: 'start' },
+  email: { x: 160, y: 470, labelX: 140, labelY: 510, labelAnchor: 'start' },
+  whatsapp: { x: 290, y: 480, labelX: 280, labelY: 520, labelAnchor: 'start' },
+};
+
+function assembleWorkNodes(layout: Record<WorkNodeId, NodeLayoutSpec>): WorkNode[] {
+  return (Object.keys(NODE_COPY) as WorkNodeId[]).map((id) => ({
+    id,
+    ...NODE_COPY[id],
+    ...layout[id],
+  }));
+}
+
+export const DEXSTOORE_NODES: readonly WorkNode[] = assembleWorkNodes(DESKTOP_NODE_LAYOUT);
 
 export const DEXSTOORE_CONNECTIONS: readonly WorkConnection[] = [
   {
@@ -257,8 +292,8 @@ function seeded(index: number, salt: number): number {
   return value - Math.floor(value);
 }
 
-function nodeById(id: WorkNodeId): WorkNode {
-  const node = DEXSTOORE_NODES.find((entry) => entry.id === id);
+function nodeById(nodes: readonly WorkNode[], id: WorkNodeId): WorkNode {
+  const node = nodes.find((entry) => entry.id === id);
   if (!node) throw new Error(`Unknown work node: ${id}`);
   return node;
 }
@@ -267,9 +302,7 @@ function nodeReach(node: WorkNode): number {
   return node.visual.spread * 0.42;
 }
 
-function connectionPath(connection: WorkConnection): string {
-  const from = nodeById(connection.from);
-  const to = nodeById(connection.to);
+function desktopConnectionPath(connection: WorkConnection, from: WorkNode, to: WorkNode): string {
   const startX = from.x;
   const startY = from.y + nodeReach(from);
   const endX = to.x;
@@ -285,24 +318,50 @@ function connectionPath(connection: WorkConnection): string {
       return `M${startX} ${startY} C${startX + 130} ${startY + 60} ${endX - 60} ${endY - 100} ${endX} ${endY}`;
     case 'fulfillment-whatsapp':
       return `M${from.x} ${from.y + nodeReach(from)} C${from.x + 55} ${from.y + 95} ${to.x - 25} ${to.y - 70} ${endX} ${endY}`;
+    case 'fulfillment-email': {
+      const startEmailX = from.x - 4;
+      const startEmailY = from.y + nodeReach(from);
+      return `M${startEmailX} ${startEmailY} C${startEmailX - 70} ${startEmailY + 55} ${endX + 10} ${endY - 55} ${endX} ${endY}`;
+    }
     default:
       return `M${startX} ${startY} L${endX} ${endY}`;
   }
 }
 
-function fulfillmentEmailPath(from: WorkNode, to: WorkNode): string {
-  const startX = from.x - 4;
+function mobileConnectionPath(connection: WorkConnection, from: WorkNode, to: WorkNode): string {
+  const startX = from.x;
   const startY = from.y + nodeReach(from);
   const endX = to.x;
   const endY = to.y - nodeReach(to);
-  return `M${startX} ${startY} C${startX - 70} ${startY + 55} ${endX + 10} ${endY - 55} ${endX} ${endY}`;
+  const midY = (startY + endY) / 2;
+
+  switch (connection.id) {
+    case 'storefront-commerce-api':
+      return `M${startX} ${startY} C${startX - 18} ${midY - 12} ${endX + 14} ${midY + 8} ${endX} ${endY}`;
+    case 'commerce-api-order-engine':
+      return `M${startX} ${startY} C${startX + 16} ${midY - 10} ${endX - 12} ${midY + 6} ${endX} ${endY}`;
+    case 'order-engine-operations':
+      return `M${startX} ${startY} C${startX - 72} ${startY + 42} ${endX + 22} ${endY - 52} ${endX} ${endY}`;
+    case 'order-engine-fulfillment':
+      return `M${startX} ${startY} C${startX + 72} ${startY + 40} ${endX - 22} ${endY - 50} ${endX} ${endY}`;
+    case 'fulfillment-email':
+      return `M${from.x - 8} ${from.y + nodeReach(from)} C${from.x - 58} ${from.y + 52} ${endX + 28} ${endY - 48} ${endX} ${endY}`;
+    case 'fulfillment-whatsapp':
+      return `M${from.x + 8} ${from.y + nodeReach(from)} C${from.x + 52} ${from.y + 50} ${endX - 24} ${endY - 46} ${endX} ${endY}`;
+    default:
+      return `M${startX} ${startY} L${endX} ${endY}`;
+  }
 }
 
-function buildConnectionPath(connection: WorkConnection): string {
-  if (connection.id === 'fulfillment-email') {
-    return fulfillmentEmailPath(nodeById(connection.from), nodeById(connection.to));
-  }
-  return connectionPath(connection);
+function buildConnectionPath(
+  connection: WorkConnection,
+  nodes: readonly WorkNode[],
+  mobileLayout: boolean,
+): string {
+  const from = nodeById(nodes, connection.from);
+  const to = nodeById(nodes, connection.to);
+  if (mobileLayout) return mobileConnectionPath(connection, from, to);
+  return desktopConnectionPath(connection, from, to);
 }
 
 function appendParticleCloud(
@@ -349,12 +408,77 @@ function appendMicroMarks(parent: SVGGElement, node: WorkNode): void {
   parent.append(group);
 }
 
-function hitAreaForNode(node: WorkNode): { x: number; y: number; width: number; height: number } {
+function mobileSupportBulletLines(node: WorkNode): string[] {
+  if (node.id === 'whatsapp') return ['Twilio', 'Integration'];
+  return node.support.split(' · ').map((part) => part.trim());
+}
+
+const MOBILE_BULLET_GAP_AFTER_TITLE = 13;
+const MOBILE_BULLET_LINE_STEP = 11;
+
+function mobileLabelBlockBottom(node: WorkNode): number {
+  const bulletCount = mobileSupportBulletLines(node).length;
+  return node.labelY + MOBILE_BULLET_GAP_AFTER_TITLE + bulletCount * MOBILE_BULLET_LINE_STEP;
+}
+
+function mobileContentBottom(nodes: readonly WorkNode[]): number {
+  let maxY = 0;
+  for (const node of nodes) {
+    const haloBottom = node.y + node.visual.spread * node.visual.outerRingScale;
+    maxY = Math.max(maxY, haloBottom, mobileLabelBlockBottom(node));
+  }
+  return maxY;
+}
+
+function mobileViewHeight(nodes: readonly WorkNode[]): number {
+  return mobileContentBottom(nodes) + MOBILE_VIEW_BOTTOM_PAD;
+}
+
+function labelHorizontalBounds(
+  node: WorkNode,
+  stackedMobileLabels: boolean,
+): { left: number; right: number; bottom: number } {
+  if (stackedMobileLabels) {
+    const blockWidth = 96;
+    const bulletCount = mobileSupportBulletLines(node).length;
+    const bottom = node.labelY + MOBILE_BULLET_GAP_AFTER_TITLE + bulletCount * MOBILE_BULLET_LINE_STEP;
+    if (node.labelAnchor === 'middle') {
+      return {
+        left: node.labelX - blockWidth / 2,
+        right: node.labelX + blockWidth / 2,
+        bottom,
+      };
+    }
+    if (node.labelAnchor === 'end') {
+      return { left: node.labelX - blockWidth, right: node.labelX + 6, bottom };
+    }
+    return { left: node.labelX - 4, right: node.labelX + blockWidth, bottom };
+  }
+
+  const labelWidth = 198;
+  const bottom = node.labelY + 26;
+  if (node.labelAnchor === 'end') {
+    return { left: node.labelX - labelWidth, right: node.labelX + 8, bottom };
+  }
+  if (node.labelAnchor === 'middle') {
+    return { left: node.labelX - labelWidth / 2, right: node.labelX + labelWidth / 2, bottom };
+  }
+  return { left: node.labelX - 6, right: node.labelX + labelWidth, bottom };
+}
+
+function hitAreaForNode(
+  node: WorkNode,
+  viewWidth: number,
+  stackedMobileLabels = false,
+): { x: number; y: number; width: number; height: number } {
   const pad = node.visual.spread * 1.08;
-  const left = node.x - pad;
-  const top = node.y - pad;
-  const right = Math.min(VIEW_WIDTH - 8, node.labelX + 196);
-  const bottom = node.labelY + 24;
+  const labelBounds = labelHorizontalBounds(node, stackedMobileLabels);
+
+  const left = Math.max(8, Math.min(node.x - pad, labelBounds.left));
+  const top = Math.min(node.y - pad, node.labelY - 14);
+  const right = Math.min(viewWidth - 8, Math.max(node.x + pad, labelBounds.right));
+  const bottom = Math.max(node.y + pad, labelBounds.bottom);
+
   return {
     x: left,
     y: top,
@@ -363,7 +487,50 @@ function hitAreaForNode(node: WorkNode): { x: number; y: number; width: number; 
   };
 }
 
-function buildVisualNode(node: WorkNode): SVGGElement {
+function appendNodeLabels(
+  labelGroup: SVGGElement,
+  node: WorkNode,
+  stackedMobileLabels: boolean,
+): void {
+  const labelAnchor = node.labelAnchor ?? 'start';
+
+  const title = document.createElementNS(SVG_NS, 'text');
+  title.setAttribute('class', 'work-label work-label__title');
+  title.setAttribute('x', String(node.labelX));
+  title.setAttribute('y', String(node.labelY));
+  title.setAttribute('text-anchor', labelAnchor);
+  title.textContent = node.title;
+  labelGroup.append(title);
+
+  if (!stackedMobileLabels) {
+    const support = document.createElementNS(SVG_NS, 'text');
+    support.setAttribute('class', 'work-label work-label__support');
+    support.setAttribute('x', String(node.labelX));
+    support.setAttribute('y', String(node.labelY + 18));
+    support.setAttribute('text-anchor', labelAnchor);
+    support.textContent = node.support;
+    labelGroup.append(support);
+    return;
+  }
+
+  labelGroup.classList.add('work-label-group--mobile-stack');
+  const bullets = mobileSupportBulletLines(node);
+  for (const [index, line] of bullets.entries()) {
+    const bullet = document.createElementNS(SVG_NS, 'text');
+    bullet.setAttribute('class', 'work-label work-label__bullet');
+    bullet.setAttribute('x', String(node.labelX));
+    bullet.setAttribute('y', String(node.labelY + MOBILE_BULLET_GAP_AFTER_TITLE + index * MOBILE_BULLET_LINE_STEP));
+    bullet.setAttribute('text-anchor', labelAnchor);
+    bullet.textContent = `· ${line}`;
+    labelGroup.append(bullet);
+  }
+}
+
+function buildVisualNode(
+  node: WorkNode,
+  viewWidth: number,
+  stackedMobileLabels = false,
+): SVGGElement {
   const group = document.createElementNS(SVG_NS, 'g');
   group.setAttribute('class', 'work-node-group');
   group.dataset.workNode = node.id;
@@ -373,7 +540,7 @@ function buildVisualNode(node: WorkNode): SVGGElement {
   interactive.style.setProperty('--work-node-origin-x', `${node.x}px`);
   interactive.style.setProperty('--work-node-origin-y', `${node.y}px`);
 
-  const hit = hitAreaForNode(node);
+  const hit = hitAreaForNode(node, viewWidth, stackedMobileLabels);
   const hitRect = document.createElementNS(SVG_NS, 'rect');
   hitRect.setAttribute('class', 'work-node-hit');
   hitRect.setAttribute('x', hit.x.toFixed(1));
@@ -415,21 +582,7 @@ function buildVisualNode(node: WorkNode): SVGGElement {
   labelGroup.setAttribute('class', 'work-label-group');
   labelGroup.dataset.workLabel = node.id;
 
-  const title = document.createElementNS(SVG_NS, 'text');
-  title.setAttribute('class', 'work-label work-label__title');
-  title.setAttribute('x', String(node.labelX));
-  title.setAttribute('y', String(node.labelY));
-  title.setAttribute('text-anchor', 'start');
-  title.textContent = node.title;
-
-  const support = document.createElementNS(SVG_NS, 'text');
-  support.setAttribute('class', 'work-label work-label__support');
-  support.setAttribute('x', String(node.labelX));
-  support.setAttribute('y', String(node.labelY + 18));
-  support.setAttribute('text-anchor', 'start');
-  support.textContent = node.support;
-
-  labelGroup.append(title, support);
+  appendNodeLabels(labelGroup, node, stackedMobileLabels);
   interactive.append(visual, labelGroup);
   group.append(interactive, hitRect);
 
@@ -468,9 +621,26 @@ export type MountedDexstooreSystem = {
 };
 
 export function mountDexstooreSystem(container: HTMLElement): MountedDexstooreSystem {
+  const mobileLayout = window.matchMedia(WORK_SYSTEM_MOBILE_BREAKPOINT).matches;
+  const nodes = mobileLayout ? assembleWorkNodes(MOBILE_NODE_LAYOUT) : DEXSTOORE_NODES;
+  const stackedMobileLabels = mobileLayout;
+  const viewWidth = mobileLayout ? MOBILE_VIEW_WIDTH : VIEW_WIDTH;
+  const mobileContentMaxY = mobileLayout ? mobileContentBottom(nodes) : 0;
+  const viewHeight = mobileLayout ? mobileViewHeight(nodes) : VIEW_HEIGHT;
+  const ambientHeight = mobileLayout
+    ? mobileContentMaxY + MOBILE_AMBIENT_BOTTOM_PAD
+    : viewHeight;
+
+  container.classList.toggle('work-section__system--mobile', mobileLayout);
+  if (mobileLayout) {
+    container.style.setProperty('--work-system-aspect', String(viewWidth / viewHeight));
+  } else {
+    container.style.removeProperty('--work-system-aspect');
+  }
+
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'work-system__svg');
-  svg.setAttribute('viewBox', `0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`);
+  svg.setAttribute('viewBox', `0 0 ${viewWidth} ${viewHeight}`);
   svg.setAttribute('role', 'presentation');
 
   const defs = document.createElementNS(SVG_NS, 'defs');
@@ -478,7 +648,13 @@ export function mountDexstooreSystem(container: HTMLElement): MountedDexstooreSy
 
   const ambientGroup = document.createElementNS(SVG_NS, 'g');
   ambientGroup.setAttribute('class', 'work-system__ambient');
-  const ambient = mountAmbientNetworkLayer(ambientGroup, VIEW_WIDTH, VIEW_HEIGHT, DEXSTOORE_NODES);
+  const ambient = mountAmbientNetworkLayer(
+    ambientGroup,
+    viewWidth,
+    ambientHeight,
+    nodes,
+    mobileLayout ? MOBILE_AMBIENT_HUBS : undefined,
+  );
 
   const pathsGroup = document.createElementNS(SVG_NS, 'g');
   pathsGroup.setAttribute('class', 'work-system__paths');
@@ -494,8 +670,8 @@ export function mountDexstooreSystem(container: HTMLElement): MountedDexstooreSy
     const gradient = document.createElementNS(SVG_NS, 'linearGradient');
     gradient.setAttribute('id', gradientId);
     gradient.setAttribute('gradientUnits', 'userSpaceOnUse');
-    const from = nodeById(connection.from);
-    const to = nodeById(connection.to);
+    const from = nodeById(nodes, connection.from);
+    const to = nodeById(nodes, connection.to);
     gradient.setAttribute('x1', String(from.x));
     gradient.setAttribute('y1', String(from.y));
     gradient.setAttribute('x2', String(to.x));
@@ -517,7 +693,7 @@ export function mountDexstooreSystem(container: HTMLElement): MountedDexstooreSy
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('class', 'work-path work-path--link');
     path.setAttribute('stroke', `url(#${gradientId})`);
-    path.setAttribute('d', buildConnectionPath(connection));
+    path.setAttribute('d', buildConnectionPath(connection, nodes, mobileLayout));
     path.dataset.workConnection = connection.id;
     pathsGroup.append(path);
     paths.push(path);
@@ -528,8 +704,8 @@ export function mountDexstooreSystem(container: HTMLElement): MountedDexstooreSy
   nodesGroup.setAttribute('class', 'work-system__nodes');
 
   const nodeGroups: SVGGElement[] = [];
-  for (const node of DEXSTOORE_NODES) {
-    const group = buildVisualNode(node);
+  for (const node of nodes) {
+    const group = buildVisualNode(node, viewWidth, stackedMobileLabels);
     nodesGroup.append(group);
     nodeGroups.push(group);
   }

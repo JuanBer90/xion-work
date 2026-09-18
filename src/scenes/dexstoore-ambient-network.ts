@@ -10,12 +10,21 @@ export type AmbientExclusionNode = {
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-const AMBIENT_HUBS = [
+export type AmbientHub = { x: number; y: number; bias: number };
+
+const DESKTOP_AMBIENT_HUBS: readonly AmbientHub[] = [
   { x: 404, y: 206, bias: 1.05 },
   { x: 388, y: 334, bias: 1.35 },
   { x: 108, y: 498, bias: 1.0 },
   { x: 648, y: 486, bias: 1.08 },
-] as const;
+];
+
+export const MOBILE_AMBIENT_HUBS: readonly AmbientHub[] = [
+  { x: 196, y: 172, bias: 1.05 },
+  { x: 252, y: 231, bias: 1.35 },
+  { x: 108, y: 417, bias: 1.0 },
+  { x: 328, y: 346, bias: 1.08 },
+];
 
 export const AMBIENT_PARTICLE_BUDGET = {
   desktop: 1_280,
@@ -80,6 +89,7 @@ function samplePosition(
   width: number,
   height: number,
   nodes: readonly AmbientExclusionNode[],
+  hubs: readonly AmbientHub[],
 ): { x: number; y: number } | null {
   for (let attempt = 0; attempt < 10; attempt += 1) {
     const salt = attempt * 17;
@@ -87,8 +97,8 @@ function samplePosition(
     let y: number;
 
     if (seeded(index, 2 + salt) < 0.58) {
-      const hubIndex = Math.floor(seeded(index, 3 + salt) * AMBIENT_HUBS.length);
-      const hub = AMBIENT_HUBS[hubIndex] ?? AMBIENT_HUBS[1];
+      const hubIndex = Math.floor(seeded(index, 3 + salt) * hubs.length);
+      const hub = hubs[hubIndex] ?? hubs[1];
       const spreadX = 130 + hub.bias * 95;
       const spreadY = 105 + hub.bias * 85;
       x = hub.x + (seeded(index, 5 + salt) - 0.5) * spreadX * 2;
@@ -136,13 +146,14 @@ export function generateAmbientParticles(
   width: number,
   height: number,
   nodes: readonly AmbientExclusionNode[],
+  hubs: readonly AmbientHub[] = DESKTOP_AMBIENT_HUBS,
 ): AmbientParticle[] {
   const particles: AmbientParticle[] = [];
   let index = 0;
   let guard = 0;
 
   while (particles.length < count && guard < count * 14) {
-    const position = samplePosition(index, width, height, nodes);
+    const position = samplePosition(index, width, height, nodes, hubs);
     guard += 1;
     index += 1;
     if (!position) continue;
@@ -233,12 +244,14 @@ export function mountAmbientNetworkLayer(
   width: number,
   height: number,
   nodes: readonly AmbientExclusionNode[],
+  hubs: readonly AmbientHub[] = DESKTOP_AMBIENT_HUBS,
 ): { ambientDots: SVGCircleElement[]; ambientPaths: SVGPathElement[] } {
   ambientGroup.setAttribute('pointer-events', 'none');
 
   const particleCount = ambientParticleCountForViewport();
-  const particles = generateAmbientParticles(particleCount, width, height, nodes);
-  const connections = generateAmbientConnections(particles, 38);
+  const maxConnectionDistance = width < 500 ? 34 : 38;
+  const particles = generateAmbientParticles(particleCount, width, height, nodes, hubs);
+  const connections = generateAmbientConnections(particles, maxConnectionDistance);
 
   const ambientDots: SVGCircleElement[] = [];
   const ambientPaths: SVGPathElement[] = [];
