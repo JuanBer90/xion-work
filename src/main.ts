@@ -1,3 +1,7 @@
 import { initNetworkIntro } from '@/animations/network-intro';
 
-initNetworkIntro();
+initNetworkIntro({
+  rotation: {
+    enabled: false,
+  },
+});
