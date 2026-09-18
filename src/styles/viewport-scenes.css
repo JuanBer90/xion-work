@@ -1,0 +1,23 @@
+body {
+  scroll-snap-type: y mandatory;
+}
+
+.app-scene {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100dvh;
+}
+
+.hero.app-scene {
+  min-height: max(100dvh, 100svh);
+}
+
+@media (max-width: 760px) {
+  .hero.app-scene {
+    min-height: max(100dvh, 66rem);
+  }
+}
+
+.work-section.app-scene {
+  min-height: max(100dvh, min(108vh, 56rem));
+}

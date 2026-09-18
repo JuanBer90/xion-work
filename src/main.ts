@@ -1,5 +1,6 @@
 import { initNetworkIntro } from '@/animations/network-intro';
-import { initWorkSectionIntro } from '@/animations/work-section-intro';
+import { createWorkSectionIntroController } from '@/animations/work-section-intro';
+import { initAppScenes } from '@/scene';
 import { initCapabilityNetworkEmphasis } from '@/network/init-capability-emphasis';
 import { initWorkArchitectureInteraction } from '@/network/init-work-architecture-interaction';
 import { mountDexstooreSystem } from '@/scenes/dexstoore-architecture';
@@ -15,5 +16,7 @@ initCapabilityNetworkEmphasis();
 const workSection = document.querySelector<HTMLElement>('.work-section');
 const workSystemMount = document.querySelector<HTMLElement>('[data-work-system]');
 const mountedWorkSystem = workSystemMount ? mountDexstooreSystem(workSystemMount) : null;
-initWorkSectionIntro(workSection, mountedWorkSystem);
+const dexstooreIntro = createWorkSectionIntroController(workSection, mountedWorkSystem);
+
+initAppScenes({ dexstooreIntro });
 initWorkArchitectureInteraction(workSystemMount);

@@ -1,4 +1,4 @@
-import { createTimeline, stagger } from 'animejs';
+import { createTimeline, stagger, type Timeline } from 'animejs';
 
 import type { MountedDexstooreSystem } from '@/scenes/dexstoore-architecture';
 import { prefersReducedMotion } from '@/utils/motion';
@@ -39,42 +39,90 @@ function revealWorkSection(section: HTMLElement): void {
   }
 }
 
-export function initWorkSectionIntro(
+function clearIntroInlineStyles(section: HTMLElement): void {
+  for (const el of section.querySelectorAll<HTMLElement>('[data-work-reveal], .work-tech')) {
+    el.style.opacity = '';
+    el.style.transform = '';
+  }
+  for (const group of section.querySelectorAll<SVGGElement>('.work-node-group')) {
+    group.style.opacity = '';
+    group.style.transform = '';
+  }
+  for (const label of section.querySelectorAll<SVGElement>('.work-label-group')) {
+    label.style.opacity = '';
+  }
+  for (const path of section.querySelectorAll<SVGPathElement>('.work-path')) {
+    path.style.opacity = '';
+    path.style.strokeDashoffset = '';
+  }
+  const ambient = section.querySelector<SVGGElement>('.work-system__ambient');
+  if (ambient) ambient.style.opacity = '';
+  for (const dot of section.querySelectorAll<SVGCircleElement>('.work-link-dot')) {
+    dot.style.opacity = '';
+  }
+}
+
+export type WorkSectionIntroController = {
+  /** Starts the intro timeline from the beginning (call `reset()` first when re-entering). */
+  play: () => void;
+  /** Returns copy, architecture, and tech to the pre-intro loading state. */
+  reset: () => void;
+  /** Cancels any in-flight intro playback. */
+  stop: () => void;
+  destroy: () => void;
+};
+
+export function createWorkSectionIntroController(
   section: HTMLElement | null,
   system: MountedDexstooreSystem | null,
-): () => void {
-  if (!section || !system) return () => undefined;
+): WorkSectionIntroController | null {
+  if (!section || !system) return null;
 
-  const copyTargets = [
-    ...section.querySelectorAll<HTMLElement>('[data-work-reveal]'),
-  ];
+  const copyTargets = [...section.querySelectorAll<HTMLElement>('[data-work-reveal]')];
   const techItems = [...section.querySelectorAll<HTMLElement>('.work-tech')];
+  const reducedMotion = prefersReducedMotion();
 
-  if (prefersReducedMotion()) {
+  if (reducedMotion) {
     revealWorkSection(section);
-    return () => undefined;
+    const noop = (): void => undefined;
+    return {
+      play: () => revealWorkSection(section),
+      reset: noop,
+      stop: noop,
+      destroy: noop,
+    };
   }
 
-  section.dataset.workState = 'loading';
-  preparePaths(system.paths);
+  let timeline: Timeline | null = null;
+  let playFrame = 0;
 
-  let played = false;
-  let observer: IntersectionObserver | null = null;
+  const stop = (): void => {
+    window.cancelAnimationFrame(playFrame);
+    playFrame = 0;
+    if (!timeline) return;
+    timeline.pause();
+    timeline.revert();
+    timeline = null;
+  };
 
-  const play = (): void => {
-    if (played) return;
-    played = true;
-    observer?.disconnect();
+  const reset = (): void => {
+    stop();
+    section.dataset.workState = 'loading';
+    clearIntroInlineStyles(section);
+    preparePaths(system.paths);
+  };
 
-    const timeline = createTimeline({
+  const buildTimeline = (): Timeline => {
+    const nextTimeline = createTimeline({
       autoplay: false,
       defaults: { ease: 'outCubic' },
       onComplete: () => {
         section.dataset.workState = 'complete';
+        timeline = null;
       },
     });
 
-    timeline
+    nextTimeline
       .add(
         copyTargets,
         {
@@ -175,21 +223,35 @@ export function initWorkSectionIntro(
         2920,
       );
 
-    window.requestAnimationFrame(() => timeline.play());
+    return nextTimeline;
   };
 
-  observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.22)) {
-        play();
-      }
+  const play = (): void => {
+    stop();
+    timeline = buildTimeline();
+    playFrame = window.requestAnimationFrame(() => {
+      playFrame = 0;
+      timeline?.play();
+    });
+  };
+
+  reset();
+
+  return {
+    play,
+    reset,
+    stop,
+    destroy: () => {
+      stop();
     },
-    { threshold: [0, 0.22, 0.4] },
-  );
-
-  observer.observe(section);
-
-  return () => {
-    observer?.disconnect();
   };
+}
+
+/** @deprecated Use `createWorkSectionIntroController` with scene lifecycle instead. */
+export function initWorkSectionIntro(
+  section: HTMLElement | null,
+  system: MountedDexstooreSystem | null,
+): () => void {
+  const controller = createWorkSectionIntroController(section, system);
+  return () => controller?.destroy();
 }
