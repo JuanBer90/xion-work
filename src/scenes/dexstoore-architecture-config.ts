@@ -1,3 +1,4 @@
+import { architectureConnectionAnchors } from '@/work-architecture/connection-anchors.ts';
 import type {
   ArchitectureConnectionPathContext,
   ArchitectureNodeVisualSpec,
@@ -103,10 +104,7 @@ function dexstooreDesktopConnectionPath({
   to,
   nodeReach,
 }: ArchitectureConnectionPathContext<DexstooreNodeId>): string {
-  const startX = from.x;
-  const startY = from.y + nodeReach(from);
-  const endX = to.x;
-  const endY = to.y - nodeReach(to);
+  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
 
   switch (connection.id) {
     case 'storefront-commerce-api':
@@ -117,10 +115,10 @@ function dexstooreDesktopConnectionPath({
     case 'order-engine-fulfillment':
       return `M${startX} ${startY} C${startX + 130} ${startY + 60} ${endX - 60} ${endY - 100} ${endX} ${endY}`;
     case 'fulfillment-whatsapp':
-      return `M${from.x} ${from.y + nodeReach(from)} C${from.x + 55} ${from.y + 95} ${to.x - 25} ${to.y - 70} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${from.x + 55} ${from.y + 95} ${to.x - 25} ${to.y - 70} ${endX} ${endY}`;
     case 'fulfillment-email': {
-      const startEmailX = from.x - 4;
-      const startEmailY = from.y + nodeReach(from);
+      const startEmailX = startX - 4;
+      const startEmailY = startY;
       return `M${startEmailX} ${startEmailY} C${startEmailX - 70} ${startEmailY + 55} ${endX + 10} ${endY - 55} ${endX} ${endY}`;
     }
     default:
@@ -134,10 +132,7 @@ function dexstooreMobileConnectionPath({
   to,
   nodeReach,
 }: ArchitectureConnectionPathContext<DexstooreNodeId>): string {
-  const startX = from.x;
-  const startY = from.y + nodeReach(from);
-  const endX = to.x;
-  const endY = to.y - nodeReach(to);
+  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
   const midY = (startY + endY) / 2;
 
   switch (connection.id) {
@@ -150,9 +145,9 @@ function dexstooreMobileConnectionPath({
     case 'order-engine-fulfillment':
       return `M${startX} ${startY} C${startX + 72} ${startY + 40} ${endX - 22} ${endY - 50} ${endX} ${endY}`;
     case 'fulfillment-email':
-      return `M${from.x - 8} ${from.y + nodeReach(from)} C${from.x - 58} ${from.y + 52} ${endX + 28} ${endY - 48} ${endX} ${endY}`;
+      return `M${startX - 8} ${startY} C${from.x - 58} ${from.y + 52} ${endX + 28} ${endY - 48} ${endX} ${endY}`;
     case 'fulfillment-whatsapp':
-      return `M${from.x + 8} ${from.y + nodeReach(from)} C${from.x + 52} ${from.y + 50} ${to.x - 24} ${endY - 46} ${endX} ${endY}`;
+      return `M${startX + 8} ${startY} C${from.x + 52} ${from.y + 50} ${to.x - 24} ${endY - 46} ${endX} ${endY}`;
     default:
       return `M${startX} ${startY} L${endX} ${endY}`;
   }

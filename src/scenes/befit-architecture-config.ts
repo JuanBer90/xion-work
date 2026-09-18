@@ -1,3 +1,4 @@
+import { architectureConnectionAnchors } from '@/work-architecture/connection-anchors.ts';
 import type {
   ArchitectureConnectionPathContext,
   ArchitectureNodeVisualSpec,
@@ -100,24 +101,22 @@ function befitDesktopConnectionPath({
   to,
   nodeReach,
 }: ArchitectureConnectionPathContext<BefitNodeId>): string {
-  const startX = from.x;
-  const startY = from.y + nodeReach(from);
-  const endX = to.x;
-  const endY = to.y - nodeReach(to);
+  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
+  const upward = to.y < from.y;
 
   switch (connection.id) {
     case 'core-access-gateway':
-      return `M${startX} ${startY} C${startX - 95} ${startY - 48} ${endX + 40} ${endY + 55} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${startX - 95} ${startY - 48} ${endX + 40} ${endY + (upward ? -55 : 55)} ${endX} ${endY}`;
     case 'access-biometric-gate':
-      return `M${startX} ${startY} C${startX - 72} ${startY - 38} ${endX + 28} ${endY + 42} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${startX - 72} ${startY - 38} ${endX + 28} ${endY + (upward ? -42 : 42)} ${endX} ${endY}`;
     case 'core-self-service-payment':
       return `M${startX} ${startY} C${startX - 88} ${startY + 52} ${endX + 35} ${endY - 48} ${endX} ${endY}`;
     case 'self-service-pos-terminal':
       return `M${startX} ${startY} C${startX - 65} ${startY + 42} ${endX + 22} ${endY - 38} ${endX} ${endY}`;
     case 'core-electronic-invoicing':
-      return `M${startX} ${startY} C${startX + 92} ${startY - 44} ${endX - 38} ${endY + 52} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${startX + 92} ${startY - 44} ${endX - 38} ${endY + (upward ? -52 : 52)} ${endX} ${endY}`;
     case 'invoicing-tax-system':
-      return `M${startX} ${startY} C${startX + 58} ${startY - 36} ${endX - 24} ${endY + 40} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${startX + 58} ${startY - 36} ${endX - 24} ${endY + (upward ? -40 : 40)} ${endX} ${endY}`;
     default:
       return `M${startX} ${startY} L${endX} ${endY}`;
   }
@@ -129,17 +128,15 @@ function befitMobileConnectionPath({
   to,
   nodeReach,
 }: ArchitectureConnectionPathContext<BefitNodeId>): string {
-  const startX = from.x;
-  const startY = from.y + nodeReach(from);
-  const endX = to.x;
-  const endY = to.y - nodeReach(to);
+  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
   const midY = (startY + endY) / 2;
+  const upward = to.y < from.y;
 
   switch (connection.id) {
     case 'core-access-gateway':
       return `M${startX} ${startY} C${startX + 14} ${midY - 8} ${endX - 12} ${midY + 6} ${endX} ${endY}`;
     case 'access-biometric-gate':
-      return `M${startX} ${startY} C${startX + 48} ${startY - 28} ${endX - 18} ${endY + 22} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${startX + 48} ${startY - 28} ${endX - 18} ${endY + (upward ? -22 : 22)} ${endX} ${endY}`;
     case 'core-self-service-payment':
       return `M${startX} ${startY} C${startX - 16} ${midY + 10} ${endX + 12} ${midY - 6} ${endX} ${endY}`;
     case 'self-service-pos-terminal':
@@ -147,7 +144,7 @@ function befitMobileConnectionPath({
     case 'core-electronic-invoicing':
       return `M${startX} ${startY} C${startX - 58} ${startY - 32} ${endX + 16} ${endY + 24} ${endX} ${endY}`;
     case 'invoicing-tax-system':
-      return `M${startX} ${startY} C${startX + 44} ${startY - 26} ${endX - 14} ${endY + 18} ${endX} ${endY}`;
+      return `M${startX} ${startY} C${startX + 44} ${startY - 26} ${endX - 14} ${endY + (upward ? -18 : 18)} ${endX} ${endY}`;
     default:
       return `M${startX} ${startY} L${endX} ${endY}`;
   }
@@ -191,10 +188,10 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       hubCore: true,
       desktop: { x: 498, y: 348, labelX: 544, labelY: 342 },
       mobile: {
-        x: 158,
-        y: 272,
-        labelX: 234,
-        labelY: 254,
+        x: 250,
+        y: 232,
+        labelX: 294,
+        labelY: 210,
         labelAnchor: 'start',
       },
     },
@@ -206,9 +203,9 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       visual: scaleNodeVisual(NODE_VISUALS['access-gateway']),
       desktop: { x: 358, y: 182, labelX: 400, labelY: 176 },
       mobile: {
-        x: 162,
+        x: 242,
         y: 148,
-        labelX: 236,
+        labelX: 290,
         labelY: 130,
         labelAnchor: 'start',
       },
@@ -221,10 +218,10 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       visual: scaleNodeVisual(NODE_VISUALS['biometric-gate']),
       desktop: { x: 162, y: 94, labelX: 204, labelY: 88 },
       mobile: {
-        x: 278,
+        x: 300,
         y: 66,
-        labelX: 198,
-        labelY: 48,
+        labelX: 258,
+        labelY: 10,
         labelAnchor: 'start',
       },
     },
@@ -236,10 +233,10 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       visual: scaleNodeVisual(NODE_VISUALS['self-service-payment']),
       desktop: { x: 322, y: 518, labelX: 364, labelY: 512 },
       mobile: {
-        x: 162,
-        y: 388,
-        labelX: 236,
-        labelY: 372,
+        x: 262,
+        y: 348,
+        labelX: 80,
+        labelY: 342,
         labelAnchor: 'start',
       },
     },
@@ -251,10 +248,10 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       visual: scaleNodeVisual(NODE_VISUALS['pos-terminal']),
       desktop: { x: 124, y: 632, labelX: 166, labelY: 626 },
       mobile: {
-        x: 282,
-        y: 468,
-        labelX: 198,
-        labelY: 452,
+        x: 242,
+        y: 438,
+        labelX: 280,
+        labelY: 432,
         labelAnchor: 'start',
       },
     },
@@ -268,8 +265,8 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       mobile: {
         x: 88,
         y: 198,
-        labelX: 50,
-        labelY: 182,
+        labelX: 20,
+        labelY: 252,
         labelAnchor: 'start',
       },
     },
@@ -281,10 +278,10 @@ export const BEFIT_ARCHITECTURE: WorkArchitectureDefinition<BefitNodeId> = {
       visual: scaleNodeVisual(NODE_VISUALS['tax-system']),
       desktop: { x: 838, y: 86, labelX: 880, labelY: 80 },
       mobile: {
-        x: 298,
-        y: 118,
-        labelX: 228,
-        labelY: 100,
+        x: 98,
+        y: 108,
+        labelX: 28,
+        labelY: 50,
         labelAnchor: 'start',
       },
     },

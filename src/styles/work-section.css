@@ -367,6 +367,10 @@
     align-items: start;
   }
 
+  .work-section--architecture-first .work-section__inner {
+    grid-template-columns: 1fr;
+  }
+
   .work-section--architecture-first .work-section__copy {
     order: 1;
   }
