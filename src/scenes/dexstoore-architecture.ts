@@ -4,8 +4,8 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const VIEW_WIDTH = 960;
 const VIEW_HEIGHT = 720;
 const MOBILE_VIEW_WIDTH = 420;
-const MOBILE_VIEW_BOTTOM_PAD = 64;
-const MOBILE_AMBIENT_BOTTOM_PAD = 24;
+const MOBILE_VIEW_BOTTOM_PAD = 0;
+const MOBILE_AMBIENT_BOTTOM_PAD = 4;
 const WORK_SYSTEM_MOBILE_BREAKPOINT = '(max-width: 760px)';
 
 export type WorkNodeId =
