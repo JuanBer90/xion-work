@@ -1,34 +1,16 @@
 import {
   type CapabilityTone,
   isCapabilityTone,
-} from './network-tones.ts';
+} from './capability-tones.ts';
 
-export type { CapabilityTone } from './network-tones.ts';
-
-export type CapabilityEmphasisState = {
-  activeCapability: CapabilityTone | null;
-};
+export type { CapabilityTone } from './capability-tones.ts';
 
 let activeCapability: CapabilityTone | null = null;
-const stateListeners = new Set<(state: CapabilityEmphasisState) => void>();
-
-export function getCapabilityEmphasisState(): CapabilityEmphasisState {
-  return { activeCapability };
-}
-
-export function getActiveCapabilityTone(): CapabilityTone | null {
-  return activeCapability;
-}
 
 export function capabilityToneFromListItem(item: Element): CapabilityTone | null {
   const tone = item.getAttribute('data-capability-tone');
   if (!tone || !isCapabilityTone(tone)) return null;
   return tone;
-}
-
-function publish(): void {
-  const state = getCapabilityEmphasisState();
-  for (const listener of stateListeners) listener(state);
 }
 
 const CAPABILITY_INACTIVE_OPACITY = 0.35;
@@ -68,12 +50,4 @@ export function setActiveCapabilityTone(
   activeCapability = tone;
   applyDataset(capabilities);
   applyCapabilityVisuals(capabilities);
-  publish();
-}
-
-export function subscribeCapabilityEmphasis(
-  listener: (state: CapabilityEmphasisState) => void,
-): () => void {
-  stateListeners.add(listener);
-  return () => stateListeners.delete(listener);
 }

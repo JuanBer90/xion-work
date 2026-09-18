@@ -1,14 +1,14 @@
 import { initHeroIntro } from '@/animations/hero-intro';
 import { createWorkSectionIntroController } from '@/animations/work-section-intro';
 import { initAppScenes } from '@/scene';
-import { initCapabilityNetworkEmphasis } from '@/network/init-capability-emphasis';
+import { initCapabilityEmphasis } from '@/network/init-capability-emphasis';
 import { initWorkArchitectureInteraction } from '@/network/init-work-architecture-interaction';
 import { mountResponsiveBefitSystem } from '@/scenes/befit-architecture';
 import { mountResponsiveDexstooreSystem } from '@/scenes/dexstoore-architecture';
 import { mountWorldbuildHero } from '@/scenes/worldbuild-hero';
 
 const heroIntro = initHeroIntro();
-const disposeCapabilityEmphasis = initCapabilityNetworkEmphasis();
+const disposeCapabilityEmphasis = initCapabilityEmphasis();
 
 const heroGlobeMount = document.querySelector<HTMLElement>('[data-worldbuild-hero]');
 const worldbuildHero = heroGlobeMount ? mountWorldbuildHero(heroGlobeMount) : null;

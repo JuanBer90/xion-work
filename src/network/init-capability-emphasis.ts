@@ -2,7 +2,7 @@ import {
   capabilityToneFromListItem,
   setActiveCapabilityTone,
 } from './capability-emphasis.ts';
-import type { CapabilityTone } from './network-tones.ts';
+import type { CapabilityTone } from './capability-tones.ts';
 
 function resolveCapabilities(): HTMLElement | null {
   const capabilities = document.querySelector<HTMLElement>('.capabilities');
@@ -16,7 +16,7 @@ function isCapabilityItem(target: EventTarget | null): HTMLElement | null {
 }
 
 /** Wires capability list hover/focus to its existing text emphasis behavior. */
-export function initCapabilityNetworkEmphasis(): () => void {
+export function initCapabilityEmphasis(): () => void {
   const capabilities = resolveCapabilities();
   if (!capabilities) return () => undefined;
 
