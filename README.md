@@ -32,22 +32,6 @@ Output is written to `dist/`. Preview locally:
 npm run preview
 ```
 
-## Network intro options
-
-`initNetworkIntro()` accepts optional configuration. Defaults preserve the current behavior (continuous rotation after the build animation).
-
-```ts
-import { initNetworkIntro } from '@/animations/network-intro';
-
-initNetworkIntro({
-  rotation: {
-    enabled: true, // default
-  },
-});
-```
-
-Set `rotation.enabled` to `false` to keep the network static in its final orientation after the intro completes (no continuous rotation).
-
 ## Project layout
 
 ```

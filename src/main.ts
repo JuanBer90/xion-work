@@ -1,18 +1,17 @@
-import { initNetworkIntro } from '@/animations/network-intro';
+import { initHeroIntro } from '@/animations/hero-intro';
 import { createWorkSectionIntroController } from '@/animations/work-section-intro';
 import { initAppScenes } from '@/scene';
 import { initCapabilityNetworkEmphasis } from '@/network/init-capability-emphasis';
 import { initWorkArchitectureInteraction } from '@/network/init-work-architecture-interaction';
 import { mountBefitSystem } from '@/scenes/befit-architecture';
 import { mountDexstooreSystem } from '@/scenes/dexstoore-architecture';
+import { mountWorldbuildHero } from '@/scenes/worldbuild-hero';
 
-initNetworkIntro({
-  rotation: {
-    enabled: false,
-  },
-});
-
+initHeroIntro();
 initCapabilityNetworkEmphasis();
+
+const heroGlobeMount = document.querySelector<HTMLElement>('[data-worldbuild-hero]');
+const worldbuildHero = heroGlobeMount ? mountWorldbuildHero(heroGlobeMount) : null;
 
 const workSection = document.querySelector<HTMLElement>('#work');
 const workSystemMount = workSection?.querySelector<HTMLElement>('[data-work-system]') ?? null;
@@ -24,7 +23,15 @@ const befitSystemMount = befitSection?.querySelector<HTMLElement>('[data-work-sy
 const mountedBefitSystem = befitSystemMount ? mountBefitSystem(befitSystemMount) : null;
 const befitIntro = createWorkSectionIntroController(befitSection, mountedBefitSystem);
 
-initAppScenes({ dexstooreIntro, befitIntro });
+const appScenes = initAppScenes({ dexstooreIntro, befitIntro, worldbuildHero });
 
 initWorkArchitectureInteraction(workSystemMount);
 initWorkArchitectureInteraction(befitSystemMount);
+
+window.addEventListener(
+  'pagehide',
+  (event) => {
+    if (!event.persisted) appScenes.destroy();
+  },
+  { once: true },
+);

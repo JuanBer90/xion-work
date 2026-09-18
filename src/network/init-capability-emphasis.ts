@@ -4,11 +4,9 @@ import {
 } from './capability-emphasis.ts';
 import type { CapabilityTone } from './network-tones.ts';
 
-function resolveTargets(): { network: HTMLElement; capabilities: HTMLElement } | null {
-  const network = document.querySelector<HTMLElement>('[data-network]');
+function resolveCapabilities(): HTMLElement | null {
   const capabilities = document.querySelector<HTMLElement>('.capabilities');
-  if (!network || !capabilities) return null;
-  return { network, capabilities };
+  return capabilities;
 }
 
 function isCapabilityItem(target: EventTarget | null): HTMLElement | null {
@@ -17,12 +15,10 @@ function isCapabilityItem(target: EventTarget | null): HTMLElement | null {
   return item ?? null;
 }
 
-/** Wires capability list hover/focus to centralized network emphasis state. */
+/** Wires capability list hover/focus to its existing text emphasis behavior. */
 export function initCapabilityNetworkEmphasis(): () => void {
-  const targets = resolveTargets();
-  if (!targets) return () => undefined;
-
-  const { capabilities } = targets;
+  const capabilities = resolveCapabilities();
+  if (!capabilities) return () => undefined;
 
   const items = [
     ...capabilities.querySelectorAll<HTMLElement>('li[data-capability-tone]'),
@@ -33,7 +29,7 @@ export function initCapabilityNetworkEmphasis(): () => void {
 
   const sync = (): void => {
     const activeTone = hoveredTone ?? focusedTone;
-    setActiveCapabilityTone(activeTone, targets);
+    setActiveCapabilityTone(activeTone, capabilities);
     for (const item of items) {
       const itemTone = capabilityToneFromListItem(item);
       item.classList.toggle('capability--engaged', itemTone !== null && itemTone === activeTone);
@@ -86,6 +82,6 @@ export function initCapabilityNetworkEmphasis(): () => void {
     hoveredTone = null;
     focusedTone = null;
     for (const item of items) item.classList.remove('capability--engaged');
-    setActiveCapabilityTone(null, targets);
+    setActiveCapabilityTone(null, capabilities);
   };
 }
