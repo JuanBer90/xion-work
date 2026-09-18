@@ -6,7 +6,19 @@
 .network-micro-dot,
 .spherical-local-path,
 .capabilities li {
-  transition: opacity 250ms ease;
+  transition:
+    opacity 250ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.capabilities li.capability--engaged {
+  transform: scale(1.07);
+}
+
+@media (max-width: 760px) {
+  .capabilities li {
+    transform-origin: left center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -19,5 +31,9 @@
   .spherical-local-path,
   .capabilities li {
     transition: none;
+  }
+
+  .capabilities li.capability--engaged {
+    transform: scale(1);
   }
 }

@@ -290,6 +290,8 @@ body {
   align-items: center;
   min-height: 2.9rem;
   white-space: nowrap;
+  transform: scale(1);
+  transform-origin: right center;
 }
 
 .capabilities__dot {

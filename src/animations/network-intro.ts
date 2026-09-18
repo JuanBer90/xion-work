@@ -28,6 +28,9 @@ function setFinalState(): void {
   for (const path of document.querySelectorAll<SVGPathElement>('.network-path, .spherical-local-path')) {
     path.style.strokeDashoffset = '0';
   }
+  for (const item of document.querySelectorAll<HTMLElement>('.capabilities li')) {
+    item.style.removeProperty('transform');
+  }
 }
 
 /** Builds the network and interface into their reference-matched resting state. */

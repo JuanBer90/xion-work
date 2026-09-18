@@ -32,7 +32,12 @@ export function initCapabilityNetworkEmphasis(): () => void {
   let focusedTone: CapabilityTone | null = null;
 
   const sync = (): void => {
-    setActiveCapabilityTone(hoveredTone ?? focusedTone, targets);
+    const activeTone = hoveredTone ?? focusedTone;
+    setActiveCapabilityTone(activeTone, targets);
+    for (const item of items) {
+      const itemTone = capabilityToneFromListItem(item);
+      item.classList.toggle('capability--engaged', itemTone !== null && itemTone === activeTone);
+    }
   };
 
   const cleanups: (() => void)[] = [];
@@ -80,6 +85,7 @@ export function initCapabilityNetworkEmphasis(): () => void {
     for (const cleanup of cleanups) cleanup();
     hoveredTone = null;
     focusedTone = null;
+    for (const item of items) item.classList.remove('capability--engaged');
     setActiveCapabilityTone(null, targets);
   };
 }
