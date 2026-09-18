@@ -245,13 +245,21 @@
 
 .work-section__technologies {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem 2.5rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: flex-start;
   max-width: 112rem;
   margin: clamp(2.5rem, 5vh, 4rem) auto 0;
   padding-top: 1.5rem;
   border-top: 1px solid var(--line-soft);
+}
+
+.work-section__tech-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  align-items: center;
+  width: 100%;
 }
 
 .work-section__technologies-label {
@@ -297,6 +305,7 @@
 .work-tech.tone-cyan .work-tech__dot { background: var(--cyan); }
 .work-tech.tone-blue .work-tech__dot { background: var(--blue); }
 .work-tech.tone-violet .work-tech__dot { background: var(--violet); }
+.work-tech.tone-yellow .work-tech__dot { background: var(--yellow); }
 
 .work-section[data-work-state='loading'] [data-work-reveal] {
   opacity: 0;
@@ -393,10 +402,14 @@
   }
 
   .work-section__technologies {
+    gap: 1.25rem;
+    margin-top: clamp(1.25rem, 3vh, 1.75rem);
+  }
+
+  .work-section__tech-group {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    margin-top: clamp(1.25rem, 3vh, 1.75rem);
+    gap: 0.75rem;
   }
 
   .work-label__title { font-size: 0.7rem; }
