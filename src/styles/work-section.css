@@ -258,6 +258,16 @@
   border-top: 1px solid var(--line-soft);
 }
 
+@media (min-width: 761px) {
+  #work.work-section .work-section__technologies {
+    margin-top: clamp(0.75rem, 1.5vh, 1.25rem);
+  }
+
+  #befit.work-section .work-section__technologies {
+    margin-top: clamp(-4rem, -7vh, -3.5rem);
+  }
+}
+
 .work-section__tech-group {
   display: flex;
   flex-wrap: wrap;
