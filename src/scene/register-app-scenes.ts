@@ -2,14 +2,35 @@ import type { WorkSectionIntroController } from '@/animations/work-section-intro
 
 import { createScene } from './create-scene.ts';
 import { initSceneScrollController, type SceneScrollController } from './scene-scroll-controller.ts';
-import type { Scene } from './types.ts';
+import type { Scene, SceneLifecycle } from './types.ts';
 
 function noop(): void {
   return undefined;
 }
 
+function workSectionIntroLifecycle(intro: WorkSectionIntroController | null): SceneLifecycle {
+  return {
+    enter: () => {
+      intro?.reset();
+      intro?.play();
+    },
+    leave: () => {
+      intro?.stop();
+      intro?.reset();
+    },
+    reset: () => {
+      intro?.stop();
+      intro?.reset();
+    },
+    destroy: () => {
+      intro?.destroy();
+    },
+  };
+}
+
 export type InitAppScenesOptions = {
   dexstooreIntro?: WorkSectionIntroController | null;
+  befitIntro?: WorkSectionIntroController | null;
 };
 
 export function createHeroScene(): Scene | null {
@@ -35,23 +56,18 @@ export function createDexstooreScene(intro: WorkSectionIntroController | null): 
   return createScene({
     id: 'dexstoore',
     element,
-    lifecycle: {
-      enter: () => {
-        intro?.reset();
-        intro?.play();
-      },
-      leave: () => {
-        intro?.stop();
-        intro?.reset();
-      },
-      reset: () => {
-        intro?.stop();
-        intro?.reset();
-      },
-      destroy: () => {
-        intro?.destroy();
-      },
-    },
+    lifecycle: workSectionIntroLifecycle(intro),
+  });
+}
+
+export function createBefitScene(intro: WorkSectionIntroController | null): Scene | null {
+  const element = document.getElementById('befit');
+  if (!element) return null;
+
+  return createScene({
+    id: 'befit',
+    element,
+    lifecycle: workSectionIntroLifecycle(intro),
   });
 }
 
@@ -59,6 +75,7 @@ export function initAppScenes(options: InitAppScenesOptions = {}): SceneScrollCo
   const scenes = [
     createHeroScene(),
     createDexstooreScene(options.dexstooreIntro ?? null),
+    createBefitScene(options.befitIntro ?? null),
   ].filter((scene): scene is Scene => scene !== null);
   return initSceneScrollController(scenes);
 }

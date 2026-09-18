@@ -1,6 +1,6 @@
 import { createTimeline, stagger, type Timeline } from 'animejs';
 
-import type { MountedDexstooreSystem } from '@/scenes/dexstoore-architecture';
+import type { MountedWorkArchitecture } from '@/work-architecture/types';
 import { prefersReducedMotion } from '@/utils/motion';
 
 function preparePaths(paths: SVGPathElement[]): void {
@@ -74,7 +74,7 @@ export type WorkSectionIntroController = {
 
 export function createWorkSectionIntroController(
   section: HTMLElement | null,
-  system: MountedDexstooreSystem | null,
+  system: MountedWorkArchitecture | null,
 ): WorkSectionIntroController | null {
   if (!section || !system) return null;
 
@@ -250,7 +250,7 @@ export function createWorkSectionIntroController(
 /** @deprecated Use `createWorkSectionIntroController` with scene lifecycle instead. */
 export function initWorkSectionIntro(
   section: HTMLElement | null,
-  system: MountedDexstooreSystem | null,
+  system: MountedWorkArchitecture | null,
 ): () => void {
   const controller = createWorkSectionIntroController(section, system);
   return () => controller?.destroy();

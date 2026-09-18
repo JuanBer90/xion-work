@@ -1,35 +1,29 @@
 import type { Scene } from './types.ts';
 
-const OBSERVER_THRESHOLDS = [0, 0.2, 0.35, 0.5, 0.65, 0.8, 1] as const;
-const MIN_VISIBLE_RATIO = 0.42;
-const SWITCH_LEAD_RATIO = 0.07;
+const OBSERVER_THRESHOLDS = [0, 0.1, 0.25, 0.5, 0.75, 1] as const;
 
-function pickActiveSceneId(
-  ratios: ReadonlyMap<string, number>,
-  currentId: string | null,
-): string | null {
-  let bestId: string | null = null;
-  let bestRatio = 0;
+/**
+ * Active scene = section whose vertical center is closest to the viewport center
+ * (among sections that intersect the viewport). Matches stacked scroll-snap sections.
+ */
+function pickActiveSceneId(scenes: readonly Scene[]): string | null {
+  const viewportMid = window.innerHeight * 0.5;
+  let activeId: string | null = null;
+  let bestDistance = Infinity;
 
-  for (const [id, ratio] of ratios) {
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestId = id;
+  for (const scene of scenes) {
+    const rect = scene.element.getBoundingClientRect();
+    if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+
+    const sectionMid = rect.top + rect.height / 2;
+    const distance = Math.abs(sectionMid - viewportMid);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      activeId = scene.id;
     }
   }
 
-  if (!bestId || bestRatio < MIN_VISIBLE_RATIO) {
-    return currentId;
-  }
-
-  if (currentId && currentId !== bestId) {
-    const currentRatio = ratios.get(currentId) ?? 0;
-    if (bestRatio < currentRatio + SWITCH_LEAD_RATIO) {
-      return currentId;
-    }
-  }
-
-  return bestId;
+  return activeId;
 }
 
 export type SceneScrollController = {
@@ -47,11 +41,6 @@ export function initSceneScrollController(scenes: readonly Scene[]): SceneScroll
       getActiveSceneId: () => null,
       destroy: () => undefined,
     };
-  }
-
-  const ratios = new Map<string, number>();
-  for (const scene of scenes) {
-    ratios.set(scene.id, 0);
   }
 
   let activeId: string | null = null;
@@ -75,7 +64,7 @@ export function initSceneScrollController(scenes: readonly Scene[]): SceneScroll
 
   const syncActive = (): void => {
     pendingFrame = 0;
-    applyActive(pickActiveSceneId(ratios, activeId));
+    applyActive(pickActiveSceneId(scenes));
   };
 
   const scheduleSync = (): void => {
@@ -84,12 +73,7 @@ export function initSceneScrollController(scenes: readonly Scene[]): SceneScroll
   };
 
   const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        const id = (entry.target as HTMLElement).dataset.sceneId;
-        if (!id) continue;
-        ratios.set(id, entry.intersectionRatio);
-      }
+    () => {
       scheduleSync();
     },
     {
@@ -104,11 +88,15 @@ export function initSceneScrollController(scenes: readonly Scene[]): SceneScroll
     observer.observe(scene.element);
   }
 
+  window.addEventListener('scroll', scheduleSync, { passive: true });
+  window.addEventListener('resize', scheduleSync, { passive: true });
   scheduleSync();
 
   return {
     getActiveSceneId: () => activeId,
     destroy: () => {
+      window.removeEventListener('scroll', scheduleSync);
+      window.removeEventListener('resize', scheduleSync);
       window.cancelAnimationFrame(pendingFrame);
       observer.disconnect();
       applyActive(null);
