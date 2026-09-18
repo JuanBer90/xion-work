@@ -138,6 +138,7 @@ body {
   left: 28.5vw;
   width: min(51vw, 75svh, 790px);
   aspect-ratio: 1;
+  pointer-events: none;
 }
 
 .network__svg {
@@ -269,9 +270,10 @@ body {
 
 .capabilities {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   top: 39.6vh;
   left: 80.8vw;
+  pointer-events: auto;
   width: 16vw;
   min-width: 12.5rem;
   margin: 0;

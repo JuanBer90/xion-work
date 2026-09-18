@@ -1,3 +1,8 @@
+import {
+  getNetworkToneEmphasisMultiplier,
+  networkToneFromElement,
+} from '@/network/capability-emphasis';
+
 const NETWORK_CENTER = { x: 550, y: 520 } as const;
 const PERSPECTIVE = 1_500;
 const DEPTH_VISUAL_GAIN = 1.65;
@@ -104,8 +109,8 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function depthOpacity(opacity: number, scale: number): number {
-  return opacity * clamp(0.66 + (scale - 1) * 2.15, 0.48, 1.28);
+function depthOpacity(opacity: number, scale: number, toneMultiplier: number): number {
+  return opacity * clamp(0.66 + (scale - 1) * 2.15, 0.48, 1.28) * toneMultiplier;
 }
 
 function samplePath(
@@ -273,7 +278,12 @@ export function startNetworkDepth(): () => void {
         'r',
         (source.radius * (0.96 + (projected.scale - 1) * 0.52)).toFixed(2),
       );
-      source.element.style.opacity = String(depthOpacity(source.opacity, projected.scale));
+      const toneMultiplier = getNetworkToneEmphasisMultiplier(
+        networkToneFromElement(source.element),
+      );
+      source.element.style.opacity = String(
+        depthOpacity(source.opacity, projected.scale, toneMultiplier),
+      );
     }
 
     for (let index = 0; index < localPaths.length; index += 1) {
@@ -285,7 +295,10 @@ export function startNetworkDepth(): () => void {
       if (!fromPoint || !toPoint) continue;
       path.setAttribute('d', pathFromPoints([fromPoint, toPoint]));
       const averageScale = (fromPoint.scale + toPoint.scale) / 2;
-      path.style.opacity = String(depthOpacity(Number(path.dataset.opacity ?? 0.24), averageScale));
+      const toneMultiplier = getNetworkToneEmphasisMultiplier(networkToneFromElement(path));
+      path.style.opacity = String(
+        depthOpacity(Number(path.dataset.opacity ?? 0.24), averageScale, toneMultiplier),
+      );
     }
 
     for (const microPoint of microPoints) {
@@ -296,7 +309,12 @@ export function startNetworkDepth(): () => void {
         'r',
         (microPoint.radius * (0.98 + (projected.scale - 1) * 0.3)).toFixed(2),
       );
-      microPoint.element.style.opacity = String(depthOpacity(microPoint.opacity, projected.scale));
+      const toneMultiplier = getNetworkToneEmphasisMultiplier(
+        networkToneFromElement(microPoint.element),
+      );
+      microPoint.element.style.opacity = String(
+        depthOpacity(microPoint.opacity, projected.scale, toneMultiplier),
+      );
     }
 
     for (const labelPoint of labelPoints) {

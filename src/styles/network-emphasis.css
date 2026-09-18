@@ -1,0 +1,23 @@
+.network-path,
+.network-node,
+.network-fragment,
+.network-label,
+.spherical-small-node,
+.network-micro-dot,
+.spherical-local-path,
+.capabilities li {
+  transition: opacity 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .network-path,
+  .network-node,
+  .network-fragment,
+  .network-label,
+  .spherical-small-node,
+  .network-micro-dot,
+  .spherical-local-path,
+  .capabilities li {
+    transition: none;
+  }
+}
