@@ -1,0 +1,52 @@
+/* Isolated Contact transmission experiment — safe to remove with the experiment module. */
+
+.contact-transmission__layer {
+  pointer-events: none;
+}
+
+.contact-transmission__trail {
+  stroke: var(--cyan);
+  stroke-width: 1;
+  opacity: 0;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--cyan) 35%, transparent));
+  pointer-events: none;
+}
+
+.contact-transmission__rocket {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px var(--cyan))
+    drop-shadow(0 0 5px color-mix(in srgb, var(--cyan) 40%, transparent));
+}
+
+.contact-transmission__rocket--viewport {
+  position: fixed;
+  z-index: 30;
+}
+
+.contact-transmission__rocket--failure-flash {
+  filter: drop-shadow(0 0 4px var(--red))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--red) 45%, transparent));
+}
+
+.contact-section__orbit-node.contact-transmission__origin-ref--hidden {
+  opacity: 0;
+  visibility: hidden;
+  filter: none;
+}
+
+@media (max-width: 760px) {
+  .contact-transmission__layer,
+  .contact-transmission__rocket,
+  .contact-transmission__rocket--viewport {
+    display: none !important;
+  }
+}

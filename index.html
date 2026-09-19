@@ -36,7 +36,6 @@
             <a href="#work"><span class="hero-nav__active" aria-hidden="true"></span>01 Work</a>
             <a href="#about">02 About</a>
             <a href="#capabilities">03 Capabilities</a>
-            <a href="#contact">04 Contact</a>
           </nav>
           <a class="talk-button intro" href="#contact" data-reveal="navigation">Let’s talk <span aria-hidden="true">→</span></a>
         </div>
@@ -154,6 +153,183 @@
             </ul>
           </div>
         </div>
+      </section>
+
+      <section class="contact-section app-scene" id="contact" aria-labelledby="contact-title" data-contact-state="loading">
+        <div class="contact-section__inner">
+          <div class="contact-section__copy">
+            <p class="work-section__eyebrow contact-section__eyebrow" data-contact-reveal>04 / Contact</p>
+            <h2 class="work-section__title contact-section__title" id="contact-title" data-contact-reveal>Let&apos;s talk</h2>
+            <p class="contact-section__flow" data-contact-reveal>Ideas → Projects → Opportunities</p>
+            <p class="contact-section__flow" data-contact-reveal>Real conversations</p>
+            <p class="work-section__desc contact-section__desc" data-contact-reveal>
+              Have a project, an engineering challenge, or an opportunity worth discussing? Send me a message and let&apos;s talk.
+            </p>
+            <div class="contact-section__orbit" aria-hidden="true">
+              <svg class="contact-section__orbit-svg" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  class="contact-section__orbit-arc"
+                  d="M 24 168 C 102 154, 238 90, 272 38"
+                  stroke="currentColor"
+                  stroke-width="1"
+                  vector-effect="non-scaling-stroke"
+                />
+                <circle class="contact-section__orbit-node" cx="118" cy="118" r="4" fill="currentColor" />
+                <path
+                  class="contact-section__orbit-spark"
+                  d="M 248 58 l 6 0 M 251 55 l 0 6 M 254 58 l -6 0 M 251 61 l 0 -6"
+                  stroke="currentColor"
+                  stroke-width="0.75"
+                  vector-effect="non-scaling-stroke"
+                />
+              </svg>
+              <div class="contact-section__orbit-callout">
+                <p class="contact-section__orbit-label" data-contact-reveal>New</p>
+                <p class="contact-section__orbit-label" data-contact-reveal>Conversations</p>
+                <p class="contact-section__orbit-label" data-contact-reveal>Start here</p>
+                <span class="contact-section__orbit-dash" data-contact-reveal aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-section__panel">
+            <p class="contact-section__channel-label" data-contact-reveal>// Open a channel</p>
+            <form class="contact-form" data-contact-form novalidate>
+              <div class="contact-form__field contact-form__field--email" data-contact-reveal>
+                <label class="contact-form__label" for="contact-email">Your email</label>
+                <span class="contact-form__signal-wrap" data-contact-email-signal-wrap>
+                  <input
+                    id="contact-email"
+                    class="contact-form__input"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="you@company.com"
+                    required
+                  />
+                </span>
+                <p
+                  id="contact-email-error"
+                  class="contact-form__email-error"
+                  data-contact-email-error
+                  hidden
+                ></p>
+              </div>
+              <div class="contact-form__field contact-form__field--message" data-contact-reveal>
+                <label class="contact-form__label" for="contact-message">Message</label>
+                <span class="contact-form__signal-wrap" data-contact-message-signal-wrap>
+                  <textarea
+                    id="contact-message"
+                    class="contact-form__textarea"
+                    name="message"
+                    rows="6"
+                    maxlength="1000"
+                    placeholder="Write your message here..."
+                    required
+                  ></textarea>
+                </span>
+                <p
+                  id="contact-message-error"
+                  class="contact-form__field-error"
+                  data-contact-message-error
+                  hidden
+                ></p>
+                <span class="contact-form__counter" data-contact-char-count aria-live="polite">0/1000</span>
+              </div>
+              <div class="contact-form__actions" data-contact-reveal>
+                <button class="contact-form__submit" type="submit">
+                  <span class="contact-form__submit-bracket" aria-hidden="true">[</span>
+                  <span class="contact-form__submit-label">Transmit</span>
+                  <span class="contact-form__submit-arrow" aria-hidden="true">→</span>
+                  <span class="contact-form__submit-bracket" aria-hidden="true">]</span>
+                </button>
+              </div>
+            </form>
+
+            <div class="contact-status" data-contact-status data-contact-submit-state="idle" aria-live="polite">
+              <div class="contact-status__header" data-contact-reveal>
+                <p class="contact-status__title">
+                  <span class="contact-status__live-dot" aria-hidden="true"></span>
+                  Live request
+                </p>
+                <p class="contact-status__meta">// Interaction demo · No message will be sent</p>
+              </div>
+              <ol class="contact-status__steps">
+                <li class="contact-status__step contact-status__step--idle" data-contact-step="validating" data-contact-reveal>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                  <span class="contact-status__label">Validating</span>
+                  <span class="contact-status__leader" aria-hidden="true"></span>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                </li>
+                <li class="contact-status__step contact-status__step--idle" data-contact-step="securing" data-contact-reveal>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                  <span class="contact-status__label">Securing</span>
+                  <span class="contact-status__leader" aria-hidden="true"></span>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                </li>
+                <li class="contact-status__step contact-status__step--idle" data-contact-step="transmitting" data-contact-reveal>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                  <span class="contact-status__label">Transmitting</span>
+                  <span class="contact-status__leader" aria-hidden="true"></span>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                </li>
+                <li class="contact-status__step contact-status__step--idle" data-contact-step="delivered" data-contact-reveal>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                  <span class="contact-status__label">Delivered</span>
+                  <span class="contact-status__leader" aria-hidden="true"></span>
+                  <span class="contact-status__ring" aria-hidden="true"></span>
+                </li>
+              </ol>
+              <p class="contact-status__failure" data-contact-transmission-failure hidden>
+                <span class="contact-status__failure-line">Transmission failed</span>
+                <span class="contact-status__failure-line">Please try again</span>
+              </p>
+              <p class="contact-status__note" data-contact-reveal>
+                <span class="contact-status__note-icon" aria-hidden="true">i</span>
+                Interactive demo only. No message will be sent.
+              </p>
+            </div>
+
+            <ul class="contact-section__social" data-contact-social>
+              <li data-contact-reveal>
+                <a class="contact-section__social-link" data-contact-link="email" href="mailto:contact@xion.work">
+                  <svg class="contact-section__social-icon" viewBox="0 0 16 12" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.5" y="0.5" width="15" height="11" stroke="currentColor" />
+                    <path d="M0.5 1.5 L8 7 L15.5 1.5" stroke="currentColor" />
+                  </svg>
+                  Email
+                </a>
+              </li>
+              <li data-contact-reveal>
+                <a class="contact-section__social-link" data-contact-link="linkedin" href="https://www.linkedin.com/in/juanduarte90/" target="_blank" rel="noopener noreferrer">
+                  <svg class="contact-section__social-icon" viewBox="0 0 14 14" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.2 5.4h2.1v6.3H3.2V5.4zm1-3.2a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zm2.4 3.2h2v.9h0c.3-.5 1-1.1 2.1-1.1 2.2 0 2.6 1.4 2.6 3.3v3.2h-2.1V9.6c0-.8 0-1.8-1.1-1.8-1.1 0-1.3.9-1.3 1.8v3.1H6.6V5.4z" />
+                  </svg>
+                  LinkedIn
+                </a>
+              </li>
+              <li data-contact-reveal>
+                <a class="contact-section__social-link" data-contact-link="github" href="https://github.com/JuanBer90" target="_blank" rel="noopener noreferrer">
+                  <svg class="contact-section__social-icon" viewBox="0 0 14 14" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 0C3.1 0 0 3.2 0 7.1c0 3.1 2 5.8 4.8 6.7.4.1.5-.2.5-.4v-1.5c-2 .4-2.5-1-2.5-1-.3-.8-.8-1-0.8-1-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.3.7.1-.5.3-.9.5-1.1-1.6-.2-3.3-.8-3.3-3.6 0-.8.3-1.5.8-2-.1-.2-.3-1 .1-2.1 0 0 .7-.2 2.2.8.6-.2 1.3-.3 2-.3s1.4.1 2 .3c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2 0 2.8-1.7 3.4-3.3 3.6.3.2.5.7.5 1.4v2.1c0 .2.1.5.6.4C12 12.9 14 10.2 14 7.1 14 3.2 10.9 0 7 0z" />
+                  </svg>
+                  GitHub
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <footer class="contact-section__foot">
+          <div class="contact-section__foot-block" data-contact-reveal>
+            <p class="contact-section__foot-brand">XION.WORK</p>
+            <p class="contact-section__foot-tag">Software · People · Possibilities</p>
+          </div>
+          <div class="contact-section__foot-block contact-section__foot-block--end" data-contact-reveal>
+            <p class="contact-section__foot-line">Built with curiosity</p>
+            <p class="contact-section__foot-line">Deployed with purpose</p>
+          </div>
+        </footer>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>

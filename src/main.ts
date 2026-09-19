@@ -1,3 +1,6 @@
+import { createContactSectionIntroController } from '@/animations/contact-section-intro';
+import { initContactForm } from '@/contact/contact-form';
+import { mountContactTransmissionExperiment } from '@/contact/experiments/contact-transmission/contact-transmission';
 import { initHeroIntro } from '@/animations/hero-intro';
 import { createWorkSectionIntroController } from '@/animations/work-section-intro';
 import { initAppScenes } from '@/scene';
@@ -5,6 +8,7 @@ import { initCapabilityEmphasis } from '@/network/init-capability-emphasis';
 import { initWorkArchitectureInteraction } from '@/network/init-work-architecture-interaction';
 import { mountResponsiveBefitSystem } from '@/scenes/befit-architecture';
 import { mountResponsiveDexstooreSystem } from '@/scenes/dexstoore-architecture';
+import { mountContactAmbient } from '@/scenes/contact-ambient';
 import { mountWorldbuildHero } from '@/scenes/worldbuild-hero';
 
 const heroIntro = initHeroIntro();
@@ -29,7 +33,24 @@ const befitArchitecture = befitSystemMount
 const mountedBefitSystem = befitArchitecture?.getMounted() ?? null;
 const befitIntro = createWorkSectionIntroController(befitSection, mountedBefitSystem);
 
-const appScenes = initAppScenes({ dexstooreIntro, befitIntro, worldbuildHero });
+const contactSection = document.getElementById('contact');
+const contactTransmission = mountContactTransmissionExperiment(contactSection);
+const contactIntro = createContactSectionIntroController(contactSection, {
+  onRocketIdleReveal: () => contactTransmission.restoreIdleRocket(),
+});
+const disposeContactForm = initContactForm(contactSection, {
+  onValidSubmit: () => contactTransmission.start(),
+});
+const contactAmbient = mountContactAmbient(contactSection);
+
+const appScenes = initAppScenes({
+  dexstooreIntro,
+  befitIntro,
+  worldbuildHero,
+  contactAmbient,
+  contactTransmission,
+  contactIntro,
+});
 
 let disposeDexstooreInteraction = initWorkArchitectureInteraction(workSystemMount);
 let disposeBefitInteraction = initWorkArchitectureInteraction(befitSystemMount);
@@ -58,6 +79,7 @@ const destroyApp = (): void => {
   disposeDexstooreInteraction();
   disposeBefitInteraction();
   disposeCapabilityEmphasis();
+  disposeContactForm();
   appScenes.destroy();
   dexstooreArchitecture?.destroy();
   befitArchitecture?.destroy();
