@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import 'nodeweave/styles.css';
 @import './base.css';
 @import './layout.css';
 @import './capability-emphasis.css';

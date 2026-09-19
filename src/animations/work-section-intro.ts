@@ -1,6 +1,6 @@
 import { createTimeline, stagger, type Timeline } from 'animejs';
 
-import type { MountedWorkArchitecture } from '@/work-architecture/types';
+import type { MountedWorkArchitecture } from '@/scenes/work-architecture-integration';
 import { prefersReducedMotion } from '@/utils/motion';
 
 /** Scales timeline offsets so architecture intro starts sooner on scene enter. */
@@ -45,6 +45,13 @@ function revealWorkSection(section: HTMLElement): void {
   if (ambient) ambient.style.opacity = '1';
   for (const dot of section.querySelectorAll<SVGCircleElement>('.work-link-dot')) {
     dot.style.opacity = dot.dataset.opacity ?? '0.2';
+  }
+}
+
+/** Nodeweave drag uses the SVG `transform` attribute on `.work-node-group`; inline CSS `transform` from intro must be cleared or it overrides drag translation. */
+function clearNodeGroupInlineTransforms(nodeGroups: readonly SVGGElement[]): void {
+  for (const group of nodeGroups) {
+    group.style.removeProperty('transform');
   }
 }
 
@@ -135,6 +142,7 @@ export function createWorkSectionIntroController(
       defaults: { ease: 'outCubic' },
       onComplete: () => {
         section.dataset.workState = 'complete';
+        clearNodeGroupInlineTransforms(mountedSystem.nodeGroups);
         timeline = null;
       },
     });
