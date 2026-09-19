@@ -312,8 +312,38 @@
   mask-composite: exclude;
 }
 
-.contact-form__signal-wrap:focus-within::before {
+.contact-form__signal-wrap:focus-within:not(.contact-form__signal-wrap--validation-error)::before {
   animation: contact-signal-trace 1.4s linear forwards;
+}
+
+.contact-form__signal-wrap--validation-error::before {
+  background: conic-gradient(
+    from var(--contact-signal-trace-angle),
+    transparent 0deg,
+    transparent 342deg,
+    var(--red) 346deg,
+    color-mix(in srgb, var(--red) 65%, var(--text)) 354deg,
+    var(--red) 362deg,
+    transparent 366deg
+  );
+  filter: drop-shadow(0 0 2px var(--red))
+    drop-shadow(0 0 6px color-mix(in srgb, var(--red) 45%, transparent));
+  animation: contact-signal-trace 1.4s linear forwards;
+}
+
+.contact-form__field-error,
+.contact-form__email-error {
+  margin: 0.45rem 0 0;
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 0.703rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contact-form__field-error[hidden],
+.contact-form__email-error[hidden] {
+  display: none;
 }
 
 @keyframes contact-signal-trace {

@@ -197,7 +197,7 @@
             <form class="contact-form" data-contact-form novalidate>
               <div class="contact-form__field contact-form__field--email">
                 <label class="contact-form__label" for="contact-email">Your email</label>
-                <span class="contact-form__signal-wrap">
+                <span class="contact-form__signal-wrap" data-contact-email-signal-wrap>
                   <input
                     id="contact-email"
                     class="contact-form__input"
@@ -208,10 +208,16 @@
                     required
                   />
                 </span>
+                <p
+                  id="contact-email-error"
+                  class="contact-form__email-error"
+                  data-contact-email-error
+                  hidden
+                ></p>
               </div>
               <div class="contact-form__field contact-form__field--message">
                 <label class="contact-form__label" for="contact-message">Message</label>
-                <span class="contact-form__signal-wrap">
+                <span class="contact-form__signal-wrap" data-contact-message-signal-wrap>
                   <textarea
                     id="contact-message"
                     class="contact-form__textarea"
@@ -222,6 +228,12 @@
                     required
                   ></textarea>
                 </span>
+                <p
+                  id="contact-message-error"
+                  class="contact-form__field-error"
+                  data-contact-message-error
+                  hidden
+                ></p>
                 <span class="contact-form__counter" data-contact-char-count aria-live="polite">0/1000</span>
               </div>
               <div class="contact-form__actions">
