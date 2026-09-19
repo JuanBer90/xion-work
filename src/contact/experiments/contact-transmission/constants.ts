@@ -8,3 +8,8 @@ export const TRANSMISSION_TIMING = {
 } as const;
 
 export const TRANSMISSION_TRAIL_LENGTH = 22;
+
+export const TRANSMISSION_FAILURE_TIMING = {
+  pauseMs: 175,
+  fadeMs: 300,
+} as const;

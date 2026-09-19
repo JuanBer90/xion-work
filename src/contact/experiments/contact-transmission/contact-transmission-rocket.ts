@@ -29,6 +29,10 @@ export type ContactTransmissionRocketLayer = {
   resetTrail: () => void;
   resetRocketPlacement: () => void;
   setIdleAtArcStart: () => void;
+  /** Stops exit motion, freezes at current pixels, red flash, fade out. */
+  fail: (pauseMs: number, fadeMs: number) => Promise<void>;
+  cancelFailureAnimation: () => void;
+  isMotionFrozen: () => boolean;
   destroy: () => void;
 };
 
@@ -134,6 +138,37 @@ export function mountContactTransmissionRocket(
   const arcTotalLength = arc.getTotalLength();
 
   let exitPlan: ViewportExitPlan | null = null;
+  let motionFrozen = false;
+  let failureTimeoutIds: ReturnType<typeof setTimeout>[] = [];
+  let failureFadeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  const clearFailureAnimation = (): void => {
+    for (const id of failureTimeoutIds) {
+      clearTimeout(id);
+    }
+    failureTimeoutIds = [];
+    if (failureFadeTimeoutId !== null) {
+      clearTimeout(failureFadeTimeoutId);
+      failureFadeTimeoutId = null;
+    }
+    rocketEl.classList.remove('contact-transmission__rocket--failure-flash');
+    rocketEl.style.transition = '';
+  };
+
+  const freezeRocketAtCurrentPixels = (): void => {
+    const rect = rocketEl.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    document.body.append(rocketEl);
+    rocketEl.classList.add(ROCKET_VIEWPORT_CLASS);
+    rocketEl.style.transition = 'none';
+    rocketEl.style.position = 'fixed';
+    rocketEl.style.left = `${centerX}px`;
+    rocketEl.style.top = `${centerY}px`;
+    rocketEl.style.zIndex = '30';
+    void rocketEl.offsetWidth;
+  };
 
   const applyRocketHeading = (headingDeg: number): void => {
     rocketEl.style.transform = `translate(-50%, -50%) rotate(${headingDeg}deg)`;
@@ -153,10 +188,14 @@ export function mountContactTransmissionRocket(
   };
 
   const resetRocketPlacement = (): void => {
+    motionFrozen = false;
+    clearFailureAnimation();
     exitPlan = null;
     rocketEl.classList.remove(ROCKET_VIEWPORT_CLASS);
     rocketEl.style.position = 'absolute';
     rocketEl.style.zIndex = '';
+    rocketEl.style.transition = '';
+    rocketEl.style.filter = '';
     if (rocketEl.parentElement !== orbit) {
       orbit.append(rocketEl);
     }
@@ -177,10 +216,12 @@ export function mountContactTransmissionRocket(
     originLength,
     arcTotalLength,
     setRocketAtPathLength(length: number, angleDeg: number): void {
+      if (motionFrozen) return;
       const point = arc.getPointAtLength(length);
       setRocketInOrbit(point.x, point.y, angleDeg, 1);
     },
     setRocketAtPoint(x: number, y: number, angleDeg: number, opacity: number): void {
+      if (motionFrozen) return;
       setRocketInOrbit(x, y, angleDeg, opacity);
     },
     prepareViewportExit(angleDeg: number): number {
@@ -201,7 +242,7 @@ export function mountContactTransmissionRocket(
       return exitPlan.durationMs;
     },
     setViewportExitProgress(progress: number, angleDeg: number, opacity: number): void {
-      if (!exitPlan) return;
+      if (motionFrozen || !exitPlan) return;
       const x = exitPlan.startX + (exitPlan.endX - exitPlan.startX) * progress;
       const y = exitPlan.startY + (exitPlan.endY - exitPlan.startY) * progress;
       rocketEl.style.left = `${x}px`;
@@ -217,6 +258,7 @@ export function mountContactTransmissionRocket(
       trailPath.style.opacity = String(0.35 * intensity);
     },
     setTrailExit(x: number, y: number, angleDeg: number, tailLength: number, intensity: number): void {
+      if (motionFrozen) return;
       const rad = (angleDeg * Math.PI) / 180;
       const x2 = x - Math.cos(rad) * tailLength;
       const y2 = y - Math.sin(rad) * tailLength;
@@ -241,7 +283,35 @@ export function mountContactTransmissionRocket(
     },
     resetRocketPlacement,
     setIdleAtArcStart,
+    isMotionFrozen(): boolean {
+      return motionFrozen;
+    },
+    cancelFailureAnimation(): void {
+      clearFailureAnimation();
+    },
+    fail(pauseMs: number, fadeMs: number): Promise<void> {
+      clearFailureAnimation();
+      motionFrozen = true;
+      freezeRocketAtCurrentPixels();
+
+      return new Promise((resolve) => {
+        const pauseId = window.setTimeout(() => {
+          rocketEl.classList.add('contact-transmission__rocket--failure-flash');
+          rocketEl.style.transition = `opacity ${fadeMs}ms ease, filter ${fadeMs}ms ease`;
+          rocketEl.style.opacity = '0';
+          failureFadeTimeoutId = window.setTimeout(() => {
+            failureFadeTimeoutId = null;
+            rocketEl.classList.remove('contact-transmission__rocket--failure-flash');
+            rocketEl.style.transition = 'none';
+            rocketEl.style.visibility = 'hidden';
+            resolve();
+          }, fadeMs);
+        }, pauseMs);
+        failureTimeoutIds.push(pauseId);
+      });
+    },
     destroy(): void {
+      clearFailureAnimation();
       mount.remove();
       rocketEl.remove();
       originNode.classList.remove(ORIGIN_HIDDEN_CLASS);

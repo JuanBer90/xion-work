@@ -32,6 +32,11 @@
   z-index: 30;
 }
 
+.contact-transmission__rocket--failure-flash {
+  filter: drop-shadow(0 0 4px var(--red))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--red) 45%, transparent));
+}
+
 .contact-section__orbit-node.contact-transmission__origin-ref--hidden {
   opacity: 0;
   visibility: hidden;

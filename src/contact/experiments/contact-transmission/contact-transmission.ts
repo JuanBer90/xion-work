@@ -1,5 +1,8 @@
 import type { ContactSubmitState } from '@/contact/contact-form';
-import { TRANSMISSION_TIMING } from '@/contact/experiments/contact-transmission/constants';
+import {
+  TRANSMISSION_FAILURE_TIMING,
+  TRANSMISSION_TIMING,
+} from '@/contact/experiments/contact-transmission/constants';
 import {
   getTangentAngleAtPathEnd,
   mountContactTransmissionRocket,
@@ -7,6 +10,8 @@ import {
 } from '@/contact/experiments/contact-transmission/contact-transmission-rocket';
 import {
   bindContactTransmissionStatus,
+  clearContactTransmissionFailure,
+  setContactTransmissionFailure,
   setContactTransmissionStatus,
 } from '@/contact/experiments/contact-transmission/contact-transmission-status';
 import {
@@ -54,6 +59,8 @@ export function mountContactTransmissionExperiment(
   }
 
   let active = false;
+  let validAttemptCount = 0;
+  let motionGeneration = 0;
   let rafId = 0;
   const timeoutIds: ReturnType<typeof setTimeout>[] = [];
 
@@ -91,8 +98,11 @@ export function mountContactTransmissionExperiment(
 
   const reset = (): void => {
     active = false;
+    motionGeneration += 1;
     clearTimers();
+    rocketLayer.cancelFailureAnimation();
     clearTransmissionEffects();
+    clearContactTransmissionFailure(statusUi);
     rocketLayer.hide();
     rocketLayer.resetRocketPlacement();
     setStage('idle');
@@ -108,14 +118,97 @@ export function mountContactTransmissionExperiment(
     clearTimers();
   };
 
-  const complete = (): void => {
-    finishDelivered();
+  const finishFailure = (): void => {
+    rocketLayer.hide();
+    rocketLayer.resetTrail();
+    rocketLayer.resetRocketPlacement();
+    setContactTransmissionFailure(statusUi);
+    active = false;
+    clearTimers();
   };
 
-  const runMotionSequence = (): void => {
-    const { validating, securing, arcTravel, exit, deliveredDelay } = TRANSMISSION_TIMING;
+  const runFailureOnArc = (motionGen: number): void => {
+    clearTimers();
+    const { pauseMs, fadeMs } = TRANSMISSION_FAILURE_TIMING;
+    void rocketLayer.fail(pauseMs, fadeMs).then(() => {
+      if (motionGen !== motionGeneration) return;
+      finishFailure();
+    });
+  };
+
+  /** Free-flight exit — only call after `setStage('delivered')`. */
+  const beginDeliveredExit = (
+    motionGen: number,
+    endAngle: number,
+    endPoint: { x: number; y: number },
+  ): void => {
+    setStage('delivered');
+
+    const exitDurationMs = rocketLayer.prepareViewportExit(endAngle);
+    const { deliveredDelay } = TRANSMISSION_TIMING;
+    const exitStartedAt = performance.now();
+
+    const exitTick = (now: number): void => {
+      if (!active || motionGen !== motionGeneration || rocketLayer.isMotionFrozen()) {
+        return;
+      }
+
+      const exitElapsed = now - exitStartedAt;
+      const exitT = easeInCubic(Math.min(1, exitElapsed / exitDurationMs));
+
+      if (exitT < 1) {
+        const tailScale = 1 + exitT * 0.85;
+        rocketLayer.setViewportExitProgress(exitT, endAngle, 1 - exitT * 0.08);
+        rocketLayer.setTrailExit(endPoint.x, endPoint.y, endAngle, 14 * tailScale, 0.5 + exitT * 0.45);
+        rafId = requestAnimationFrame(exitTick);
+        return;
+      }
+
+      if (exitElapsed < exitDurationMs + deliveredDelay) {
+        rocketLayer.hide();
+        rocketLayer.resetTrail();
+        rocketLayer.resetRocketPlacement();
+        rafId = requestAnimationFrame(exitTick);
+        return;
+      }
+
+      finishDelivered();
+    };
+
+    rafId = requestAnimationFrame(exitTick);
+  };
+
+  const holdRocketAtArcEnd = (arcEnd: number, endAngle: number): void => {
+    rocketLayer.setRocketAtPathLength(arcEnd, endAngle);
+    rocketLayer.setTrailAtPathLength(arcEnd, 0.85);
+  };
+
+  const resolveArcEnd = (
+    motionGen: number,
+    simulateFailure: boolean,
+    arcEnd: number,
+    endAngle: number,
+    endPoint: { x: number; y: number },
+    deliveredExitStarted: { value: boolean },
+  ): void => {
+    holdRocketAtArcEnd(arcEnd, endAngle);
+
+    if (simulateFailure) {
+      runFailureOnArc(motionGen);
+      return;
+    }
+
+    if (!deliveredExitStarted.value) {
+      deliveredExitStarted.value = true;
+      beginDeliveredExit(motionGen, endAngle, endPoint);
+    }
+  };
+
+  const runMotionSequence = (simulateFailure: boolean): void => {
+    const motionGen = motionGeneration;
+    const { validating, securing, arcTravel } = TRANSMISSION_TIMING;
     const arcStart = validating + securing;
-    const exitStart = arcStart + arcTravel;
+    const arcEndTime = arcStart + arcTravel;
 
     const arcStartLength = 0;
     const arcEnd = rocketLayer.arcTotalLength;
@@ -127,14 +220,18 @@ export function mountContactTransmissionExperiment(
     setStage('validating');
     rocketLayer.setRocketAtPathLength(arcStartLength, startAngle);
 
-    let exitDurationMs: number = exit;
-    let deliveredAt = exitStart + exit + deliveredDelay;
-    let exitPrepared = false;
+    const deliveredExitStarted = { value: false };
 
     const startedAt = performance.now();
 
     const tick = (now: number): void => {
-      if (!active) return;
+      if (!active || motionGen !== motionGeneration || rocketLayer.isMotionFrozen()) {
+        return;
+      }
+
+      if (deliveredExitStarted.value) {
+        return;
+      }
 
       const elapsed = now - startedAt;
 
@@ -146,7 +243,7 @@ export function mountContactTransmissionExperiment(
         setStage('securing');
         rocketLayer.setRocketAtPathLength(arcStartLength, startAngle);
         rocketLayer.setTrailAtPathLength(arcStartLength, 0.55);
-      } else if (elapsed < exitStart) {
+      } else if (elapsed < arcEndTime) {
         setStage('transmitting');
         const arcElapsed = elapsed - arcStart;
         const arcT = easeInOutCubic(Math.min(1, arcElapsed / arcTravel));
@@ -154,24 +251,9 @@ export function mountContactTransmissionExperiment(
         const angle = getPathTangentAngle(arc, length);
         rocketLayer.setRocketAtPathLength(length, angle);
         rocketLayer.setTrailAtPathLength(length, 0.85);
-      } else if (elapsed < exitStart + exitDurationMs) {
-        if (!exitPrepared) {
-          rocketLayer.setRocketAtPathLength(arcEnd, endAngle);
-          exitDurationMs = rocketLayer.prepareViewportExit(endAngle);
-          deliveredAt = exitStart + exitDurationMs + deliveredDelay;
-          exitPrepared = true;
-        }
-        const exitElapsed = elapsed - exitStart;
-        const exitT = easeInCubic(Math.min(1, exitElapsed / exitDurationMs));
-        const tailScale = 1 + exitT * 0.85;
-        rocketLayer.setViewportExitProgress(exitT, endAngle, 1 - exitT * 0.08);
-        rocketLayer.setTrailExit(endPoint.x, endPoint.y, endAngle, 14 * tailScale, 0.5 + exitT * 0.45);
-      } else if (elapsed < deliveredAt) {
-        rocketLayer.hide();
-        rocketLayer.resetTrail();
-        rocketLayer.resetRocketPlacement();
       } else {
-        finishDelivered();
+        setStage('transmitting');
+        resolveArcEnd(motionGen, simulateFailure, arcEnd, endAngle, endPoint, deliveredExitStarted);
         return;
       }
 
@@ -181,38 +263,57 @@ export function mountContactTransmissionExperiment(
     rafId = requestAnimationFrame(tick);
   };
 
-  const runReducedMotionSequence = (): void => {
+  const runReducedMotionSequence = (simulateFailure: boolean): void => {
     const { validating, securing, arcTravel, exit, deliveredDelay } = TRANSMISSION_TIMING;
     const arcStart = validating + securing;
-    const exitStart = arcStart + arcTravel;
-    const deliveredAt = exitStart + exit + deliveredDelay;
+    const arcEndTime = arcStart + arcTravel;
+    const arcEnd = rocketLayer.arcTotalLength;
+    const endAngle = getTangentAngleAtPathEnd(arc);
+    const motionGen = motionGeneration;
 
     pulseOriginNode(originNode, 'cyan');
     setStage('validating');
 
     schedule(() => setStage('securing'), validating);
     schedule(() => setStage('transmitting'), arcStart);
+
     schedule(() => {
+      holdRocketAtArcEnd(arcEnd, endAngle);
+      if (simulateFailure) {
+        runFailureOnArc(motionGen);
+        return;
+      }
+      setStage('delivered');
       rocketLayer.hide();
       rocketLayer.resetTrail();
-    }, exitStart);
-    schedule(finishDelivered, deliveredAt);
+      schedule(finishDelivered, exit + deliveredDelay);
+    }, arcEndTime);
+  };
+
+  const complete = (): void => {
+    finishDelivered();
   };
 
   const start = (): void => {
     if (active) return;
 
+    validAttemptCount += 1;
+    const simulateFailure = validAttemptCount === 1;
+
+    clearContactTransmissionFailure(statusUi);
     clearTransmissionEffects();
+    rocketLayer.cancelFailureAnimation();
     rocketLayer.resetRocketPlacement();
     rocketLayer.setRocketAtPathLength(0, getPathTangentAngle(arc, 0));
     active = true;
+    motionGeneration += 1;
 
     if (prefersReducedMotion()) {
-      runReducedMotionSequence();
+      runReducedMotionSequence(simulateFailure);
       return;
     }
 
-    runMotionSequence();
+    runMotionSequence(simulateFailure);
   };
 
   const destroy = (): void => {
@@ -222,6 +323,9 @@ export function mountContactTransmissionExperiment(
 
   const restoreIdleRocket = (): void => {
     if (active) return;
+    if (statusUi.root.getAttribute('data-contact-transmission-outcome') === 'failed') {
+      return;
+    }
     rocketLayer.setIdleAtArcStart();
   };
 

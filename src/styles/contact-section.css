@@ -480,6 +480,7 @@
 }
 
 .contact-status__step {
+  position: relative;
   display: grid;
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
@@ -490,6 +491,32 @@
   font-size: 0.703rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
+}
+
+.contact-status__step--complete::after,
+.contact-status__step--failed::after,
+.contact-status__step--skipped::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  font-size: 0.703rem;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.contact-status__step--complete::after {
+  color: color-mix(in srgb, var(--text-soft) 88%, var(--text));
+  content: '✓';
+}
+
+.contact-status__step--failed::after {
+  color: var(--red);
+  content: '×';
+}
+
+.contact-status__step--skipped::after {
+  color: var(--text-muted);
+  content: '—';
 }
 
 .contact-status__ring {
@@ -657,6 +684,48 @@
   opacity: 1;
   background-image: radial-gradient(circle, color-mix(in srgb, var(--green) 58%, var(--line)) 0.55px, transparent 0.6px);
   filter: drop-shadow(0 0 2px color-mix(in srgb, var(--green) 28%, transparent));
+}
+
+.contact-status__step--failed[data-contact-step='transmitting'] .contact-status__label {
+  color: var(--red);
+  transform: scale(1.1);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--red) 38%, transparent);
+}
+
+.contact-status__step--failed[data-contact-step='transmitting'] .contact-status__ring {
+  border-color: color-mix(in srgb, var(--red) 72%, var(--line));
+  background: color-mix(in srgb, var(--red) 26%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--red) 40%, transparent);
+  opacity: 1;
+}
+
+.contact-status__step--failed[data-contact-step='transmitting'] .contact-status__leader {
+  opacity: 1;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--red) 58%, var(--line)) 0.55px, transparent 0.6px);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--red) 28%, transparent));
+}
+
+.contact-status__failure {
+  margin: 1rem 0 0;
+  padding: 0;
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 0.703rem;
+  letter-spacing: 0.11em;
+  line-height: 1.55;
+  text-transform: uppercase;
+}
+
+.contact-status__failure[hidden] {
+  display: none;
+}
+
+.contact-status__failure-line {
+  display: block;
+}
+
+.contact-status__failure-line:first-child {
+  color: var(--red);
 }
 
 .contact-status__note {

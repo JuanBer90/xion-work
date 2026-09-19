@@ -12,6 +12,7 @@ export type ContactSubmitState =
   | 'securing'
   | 'transmitting'
   | 'delivered'
+  | 'failed'
   | 'error';
 
 const MESSAGE_MAX_LENGTH = 1000;
