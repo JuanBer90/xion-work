@@ -79,7 +79,14 @@ function showFieldValidationFailure(
   input.focus();
 }
 
-export function initContactForm(root: HTMLElement | null): () => void {
+export type InitContactFormOptions = {
+  onValidSubmit?: () => void;
+};
+
+export function initContactForm(
+  root: HTMLElement | null,
+  options: InitContactFormOptions = {},
+): () => void {
   if (!root) return () => undefined;
 
   applyContactLinks(root);
@@ -92,7 +99,6 @@ export function initContactForm(root: HTMLElement | null): () => void {
   const messageSignalWrap = root.querySelector<HTMLElement>('[data-contact-message-signal-wrap]');
   const messageError = root.querySelector<HTMLElement>('[data-contact-message-error]');
   const counter = root.querySelector<HTMLElement>('[data-contact-char-count]');
-  const statusRoot = root.querySelector<HTMLElement>('[data-contact-status]');
 
   if (
     !form ||
@@ -155,7 +161,7 @@ export function initContactForm(root: HTMLElement | null): () => void {
 
     clearFieldValidationUi(messageValidationUi);
 
-    statusRoot?.setAttribute('data-contact-submit-state', 'idle');
+    options.onValidSubmit?.();
   };
 
   emailInput.addEventListener('input', onEmailInput);

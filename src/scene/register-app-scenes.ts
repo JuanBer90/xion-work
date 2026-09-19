@@ -1,4 +1,5 @@
 import type { WorkSectionIntroController } from '@/animations/work-section-intro';
+import type { ContactTransmissionController } from '@/contact/experiments/contact-transmission/contact-transmission';
 import type { ContactAmbientController } from '@/scenes/contact-ambient';
 import type { WorldbuildHeroController } from '@/scenes/worldbuild-hero';
 
@@ -34,6 +35,7 @@ export type InitAppScenesOptions = {
   befitIntro?: WorkSectionIntroController | null;
   worldbuildHero?: WorldbuildHeroController | null;
   contactAmbient?: ContactAmbientController | null;
+  contactTransmission?: ContactTransmissionController | null;
 };
 
 export function createHeroScene(worldbuildHero: WorldbuildHeroController | null = null): Scene | null {
@@ -76,6 +78,7 @@ export function createBefitScene(intro: WorkSectionIntroController | null): Scen
 
 export function createContactScene(
   contactAmbient: ContactAmbientController | null = null,
+  contactTransmission: ContactTransmissionController | null = null,
 ): Scene | null {
   const element = document.getElementById('contact');
   if (!element) return null;
@@ -86,12 +89,17 @@ export function createContactScene(
     lifecycle: {
       enter: () => {
         contactAmbient?.enter();
+        contactTransmission?.reset();
       },
       leave: () => {
         contactAmbient?.leave();
+        contactTransmission?.reset();
       },
-      reset: noop,
+      reset: () => {
+        contactTransmission?.reset();
+      },
       destroy: () => {
+        contactTransmission?.destroy();
         contactAmbient?.destroy();
       },
     },
@@ -103,7 +111,7 @@ export function initAppScenes(options: InitAppScenesOptions = {}): SceneScrollCo
     createHeroScene(options.worldbuildHero ?? null),
     createDexstooreScene(options.dexstooreIntro ?? null),
     createBefitScene(options.befitIntro ?? null),
-    createContactScene(options.contactAmbient ?? null),
+    createContactScene(options.contactAmbient ?? null, options.contactTransmission ?? null),
   ].filter((scene): scene is Scene => scene !== null);
   return initSceneScrollController(scenes);
 }

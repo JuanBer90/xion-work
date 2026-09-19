@@ -1,0 +1,71 @@
+/* Isolated Contact transmission experiment — safe to remove with the experiment module. */
+
+.contact-transmission__layer {
+  pointer-events: none;
+}
+
+.contact-transmission__trail {
+  stroke: var(--cyan);
+  stroke-width: 1;
+  opacity: 0;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--cyan) 35%, transparent));
+  pointer-events: none;
+}
+
+.contact-transmission__rocket {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px var(--cyan))
+    drop-shadow(0 0 5px color-mix(in srgb, var(--cyan) 40%, transparent));
+}
+
+.contact-transmission__rocket--viewport {
+  position: fixed;
+  z-index: 30;
+}
+
+.contact-section__orbit-node.contact-transmission__origin-ref--hidden {
+  opacity: 0;
+  visibility: hidden;
+  filter: none;
+}
+
+.contact-status__step--active .contact-status__label {
+  color: var(--text);
+}
+
+.contact-status__step--complete .contact-status__label {
+  color: var(--text-soft);
+}
+
+.contact-status__step--active .contact-status__ring:first-child {
+  border-color: color-mix(in srgb, var(--cyan) 55%, var(--line));
+  background: color-mix(in srgb, var(--cyan) 22%, transparent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--cyan) 35%, transparent);
+}
+
+.contact-status[data-contact-submit-state='securing'] .contact-status__step--active .contact-status__ring:first-child {
+  border-color: color-mix(in srgb, var(--orange) 55%, var(--line));
+  background: color-mix(in srgb, var(--orange) 18%, transparent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--orange) 30%, transparent);
+}
+
+.contact-status[data-contact-submit-state='transmitting'] .contact-status__step--active .contact-status__ring:first-child {
+  border-color: color-mix(in srgb, var(--violet) 55%, var(--line));
+  background: color-mix(in srgb, var(--violet) 18%, transparent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--violet) 30%, transparent);
+}
+
+.contact-status[data-contact-submit-state='delivered'] .contact-status__step--active .contact-status__ring:first-child {
+  border-color: color-mix(in srgb, var(--green) 55%, var(--line));
+  background: color-mix(in srgb, var(--green) 18%, transparent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--green) 30%, transparent);
+}
