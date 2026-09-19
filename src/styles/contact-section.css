@@ -497,6 +497,11 @@
   height: 0.55rem;
   border: 1px solid var(--line);
   border-radius: 50%;
+  transition:
+    border-color 300ms ease,
+    background 300ms ease,
+    box-shadow 300ms ease,
+    opacity 300ms ease;
 }
 
 .contact-status__step[data-contact-step='validating'] .contact-status__ring {
@@ -538,6 +543,120 @@
   background-size: 5px 1px;
   background-repeat: repeat-x;
   opacity: 0.85;
+  transition:
+    opacity 300ms ease,
+    filter 300ms ease,
+    background-image 300ms ease;
+}
+
+.contact-status__label {
+  display: inline-block;
+  transform: scale(1);
+  transform-origin: left center;
+  transition:
+    transform 300ms ease,
+    color 300ms ease,
+    text-shadow 300ms ease;
+}
+
+.contact-status__step--idle .contact-status__label {
+  color: var(--text-muted);
+  transform: scale(1);
+  text-shadow: none;
+}
+
+.contact-status__step--complete .contact-status__label {
+  color: var(--text-soft);
+  transform: scale(1);
+  text-shadow: none;
+}
+
+.contact-status__step--complete[data-contact-step='validating'] .contact-status__label {
+  color: color-mix(in srgb, var(--cyan) 32%, var(--text-soft));
+}
+
+.contact-status__step--complete[data-contact-step='securing'] .contact-status__label {
+  color: color-mix(in srgb, var(--orange) 32%, var(--text-soft));
+}
+
+.contact-status__step--complete[data-contact-step='transmitting'] .contact-status__label {
+  color: color-mix(in srgb, var(--violet) 32%, var(--text-soft));
+}
+
+.contact-status__step--active .contact-status__label {
+  transform: scale(1.1);
+}
+
+.contact-status__step--active[data-contact-step='validating'] .contact-status__label {
+  color: var(--cyan);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 38%, transparent);
+}
+
+.contact-status__step--active[data-contact-step='securing'] .contact-status__label {
+  color: var(--orange);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--orange) 38%, transparent);
+}
+
+.contact-status__step--active[data-contact-step='transmitting'] .contact-status__label {
+  color: var(--violet);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--violet) 38%, transparent);
+}
+
+.contact-status__step--active[data-contact-step='delivered'] .contact-status__label {
+  color: var(--green);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--green) 38%, transparent);
+}
+
+.contact-status__step--active[data-contact-step='validating'] .contact-status__ring {
+  border-color: color-mix(in srgb, var(--cyan) 72%, var(--line));
+  background: color-mix(in srgb, var(--cyan) 30%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--cyan) 42%, transparent);
+  opacity: 1;
+}
+
+.contact-status__step--active[data-contact-step='securing'] .contact-status__ring {
+  border-color: color-mix(in srgb, var(--orange) 72%, var(--line));
+  background: color-mix(in srgb, var(--orange) 26%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--orange) 40%, transparent);
+  opacity: 1;
+}
+
+.contact-status__step--active[data-contact-step='transmitting'] .contact-status__ring {
+  border-color: color-mix(in srgb, var(--violet) 72%, var(--line));
+  background: color-mix(in srgb, var(--violet) 26%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--violet) 40%, transparent);
+  opacity: 1;
+}
+
+.contact-status__step--active[data-contact-step='delivered'] .contact-status__ring {
+  border-color: color-mix(in srgb, var(--green) 72%, var(--line));
+  background: color-mix(in srgb, var(--green) 26%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--green) 40%, transparent);
+  opacity: 1;
+}
+
+.contact-status__step--active[data-contact-step='validating'] .contact-status__leader {
+  opacity: 1;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--cyan) 58%, var(--line)) 0.55px, transparent 0.6px);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--cyan) 28%, transparent));
+}
+
+.contact-status__step--active[data-contact-step='securing'] .contact-status__leader {
+  opacity: 1;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--orange) 58%, var(--line)) 0.55px, transparent 0.6px);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--orange) 28%, transparent));
+}
+
+.contact-status__step--active[data-contact-step='transmitting'] .contact-status__leader {
+  opacity: 1;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--violet) 58%, var(--line)) 0.55px, transparent 0.6px);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--violet) 28%, transparent));
+}
+
+.contact-status__step--active[data-contact-step='delivered'] .contact-status__leader {
+  opacity: 1;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--green) 58%, var(--line)) 0.55px, transparent 0.6px);
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--green) 28%, transparent));
 }
 
 .contact-status__note {
@@ -760,5 +879,11 @@
 
   .contact-status__live-dot {
     box-shadow: none;
+  }
+
+  .contact-status__label,
+  .contact-status__ring,
+  .contact-status__leader {
+    transition: none;
   }
 }

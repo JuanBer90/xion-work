@@ -37,35 +37,3 @@
   visibility: hidden;
   filter: none;
 }
-
-.contact-status__step--active .contact-status__label {
-  color: var(--text);
-}
-
-.contact-status__step--complete .contact-status__label {
-  color: var(--text-soft);
-}
-
-.contact-status__step--active .contact-status__ring:first-child {
-  border-color: color-mix(in srgb, var(--cyan) 55%, var(--line));
-  background: color-mix(in srgb, var(--cyan) 22%, transparent);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--cyan) 35%, transparent);
-}
-
-.contact-status[data-contact-submit-state='securing'] .contact-status__step--active .contact-status__ring:first-child {
-  border-color: color-mix(in srgb, var(--orange) 55%, var(--line));
-  background: color-mix(in srgb, var(--orange) 18%, transparent);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--orange) 30%, transparent);
-}
-
-.contact-status[data-contact-submit-state='transmitting'] .contact-status__step--active .contact-status__ring:first-child {
-  border-color: color-mix(in srgb, var(--violet) 55%, var(--line));
-  background: color-mix(in srgb, var(--violet) 18%, transparent);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--violet) 30%, transparent);
-}
-
-.contact-status[data-contact-submit-state='delivered'] .contact-status__step--active .contact-status__ring:first-child {
-  border-color: color-mix(in srgb, var(--green) 55%, var(--line));
-  background: color-mix(in srgb, var(--green) 18%, transparent);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--green) 30%, transparent);
-}
