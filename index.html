@@ -195,29 +195,33 @@
           <div class="contact-section__panel">
             <p class="contact-section__channel-label">// Open a channel</p>
             <form class="contact-form" data-contact-form novalidate>
-              <div class="contact-form__field">
+              <div class="contact-form__field contact-form__field--email">
                 <label class="contact-form__label" for="contact-email">Your email</label>
-                <input
-                  id="contact-email"
-                  class="contact-form__input"
-                  type="email"
-                  name="email"
-                  autocomplete="email"
-                  placeholder="you@company.com"
-                  required
-                />
+                <span class="contact-form__signal-wrap">
+                  <input
+                    id="contact-email"
+                    class="contact-form__input"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="you@company.com"
+                    required
+                  />
+                </span>
               </div>
               <div class="contact-form__field contact-form__field--message">
                 <label class="contact-form__label" for="contact-message">Message</label>
-                <textarea
-                  id="contact-message"
-                  class="contact-form__textarea"
-                  name="message"
-                  rows="6"
-                  maxlength="1000"
-                  placeholder="Write your message here..."
-                  required
-                ></textarea>
+                <span class="contact-form__signal-wrap">
+                  <textarea
+                    id="contact-message"
+                    class="contact-form__textarea"
+                    name="message"
+                    rows="6"
+                    maxlength="1000"
+                    placeholder="Write your message here..."
+                    required
+                  ></textarea>
+                </span>
                 <span class="contact-form__counter" data-contact-char-count aria-live="polite">0/1000</span>
               </div>
               <div class="contact-form__actions">

@@ -262,6 +262,83 @@
   outline-offset: 2px;
 }
 
+.contact-form__signal-wrap .contact-form__input:focus,
+.contact-form__signal-wrap .contact-form__input:focus-visible,
+.contact-form__signal-wrap .contact-form__textarea:focus,
+.contact-form__signal-wrap .contact-form__textarea:focus-visible {
+  outline: none;
+}
+
+@property --contact-signal-trace-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.contact-form__signal-wrap {
+  position: relative;
+  display: block;
+}
+
+.contact-form__signal-wrap .contact-form__input,
+.contact-form__signal-wrap .contact-form__textarea {
+  position: relative;
+  z-index: 1;
+}
+
+.contact-form__signal-wrap::before {
+  position: absolute;
+  z-index: 2;
+  inset: -1px;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--contact-signal-trace-angle),
+    transparent 0deg,
+    transparent 342deg,
+    var(--cyan) 346deg,
+    color-mix(in srgb, var(--cyan) 65%, var(--text)) 354deg,
+    var(--cyan) 362deg,
+    transparent 366deg
+  );
+  opacity: 0;
+  content: '';
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px var(--cyan))
+    drop-shadow(0 0 6px color-mix(in srgb, var(--cyan) 45%, transparent));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.contact-form__signal-wrap:focus-within::before {
+  animation: contact-signal-trace 1.4s linear forwards;
+}
+
+@keyframes contact-signal-trace {
+  0% {
+    --contact-signal-trace-angle: 0deg;
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    --contact-signal-trace-angle: 360deg;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-form__signal-wrap::before {
+    animation: none !important;
+    content: none;
+  }
+}
+
 .contact-form__textarea {
   min-height: 9.5rem;
   resize: vertical;
