@@ -323,6 +323,59 @@ export function mountContactTransmissionRocket(
   };
 }
 
+/** Status-only transmission (mobile): timings unchanged, no DOM rocket or rAF motion. */
+export function createNoopContactTransmissionRocketLayer(
+  arc: SVGPathElement,
+): ContactTransmissionRocketLayer {
+  const trailPath = document.createElementNS(ROCKET_NS, 'path');
+  const arcTotalLength = arc.getTotalLength();
+  let motionFrozen = false;
+  let failureTimeoutIds: ReturnType<typeof setTimeout>[] = [];
+
+  const clearFailureAnimation = (): void => {
+    for (const id of failureTimeoutIds) clearTimeout(id);
+    failureTimeoutIds = [];
+  };
+
+  const resetMotionState = (): void => {
+    clearFailureAnimation();
+    motionFrozen = false;
+  };
+
+  const noop = (): void => undefined;
+
+  return {
+    trailPath,
+    originLength: 0,
+    arcTotalLength,
+    setRocketAtPathLength: noop,
+    setRocketAtPoint: noop,
+    prepareViewportExit: () => 1200,
+    setViewportExitProgress: noop,
+    setTrailExit: noop,
+    setTrailAtPathLength: noop,
+    reveal: noop,
+    hide: noop,
+    resetTrail: noop,
+    resetRocketPlacement: resetMotionState,
+    setIdleAtArcStart: noop,
+    isMotionFrozen: () => motionFrozen,
+    cancelFailureAnimation: resetMotionState,
+    fail(pauseMs: number, fadeMs: number): Promise<void> {
+      clearFailureAnimation();
+      motionFrozen = true;
+      return new Promise((resolve) => {
+        const id = window.setTimeout(() => {
+          motionFrozen = false;
+          resolve();
+        }, pauseMs + fadeMs);
+        failureTimeoutIds.push(id);
+      });
+    },
+    destroy: resetMotionState,
+  };
+}
+
 /** Origin marker is path reference only; no visible pulse (node stays hidden). */
 export function pulseOriginNode(_node: SVGCircleElement, _variant: 'cyan' | 'green'): void {
   return undefined;

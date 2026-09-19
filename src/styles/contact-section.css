@@ -1,10 +1,13 @@
 .contact-section {
+  --contact-section-inline: 5vw;
   position: relative;
   isolation: isolate;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding: clamp(4.5rem, 10vh, 7rem) 5vw clamp(2rem, 4vh, 3rem);
+  padding-inline: var(--contact-section-inline);
+  padding-top: var(--contact-section-inline);
+  padding-bottom: clamp(2rem, 4vh, 3rem);
   color: var(--text);
   background: var(--bg);
   overflow: hidden;
@@ -135,19 +138,6 @@
   position: relative;
   margin-top: clamp(2rem, 5vh, 3.5rem);
   color: var(--cyan);
-}
-
-.contact-section__orbit::before {
-  position: absolute;
-  top: 8%;
-  left: 6%;
-  width: 58%;
-  height: 52%;
-  border: 1px dashed color-mix(in srgb, var(--cyan) 22%, var(--line));
-  border-radius: 50%;
-  opacity: 0.45;
-  content: '';
-  pointer-events: none;
 }
 
 .contact-section__orbit-svg {
@@ -862,21 +852,45 @@
 
 @media (max-width: 760px) {
   .contact-section {
-    padding: 4rem 1.25rem 2.5rem;
+    --contact-section-inline: 1.25rem;
+    padding-bottom: 2.5rem;
+    overflow-x: clip;
+  }
+
+  .contact-section.app-scene {
+    min-height: auto;
+  }
+
+  .contact-section::after {
+    display: none;
+  }
+
+  .contact-section__ambient {
+    display: none;
+  }
+
+  .contact-section__orbit {
+    display: none;
   }
 
   .contact-section__inner {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+    align-items: start;
   }
 
   .contact-section__copy {
     max-width: none;
   }
 
+  .contact-section__desc {
+    max-width: none;
+  }
+
   .contact-section__panel {
     max-width: none;
     justify-self: stretch;
+    width: 100%;
   }
 
   .contact-section__channel-label {
@@ -885,25 +899,6 @@
 
   .contact-section__foot-block--end {
     text-align: left;
-  }
-
-  .contact-section__ambient {
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      rgb(0 0 0 / 100%) 0%,
-      rgb(0 0 0 / 100%) 36%,
-      rgb(0 0 0 / 45%) 46%,
-      rgb(0 0 0 / 12%) 54%,
-      transparent 62%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      rgb(0 0 0 / 100%) 0%,
-      rgb(0 0 0 / 100%) 36%,
-      rgb(0 0 0 / 45%) 46%,
-      rgb(0 0 0 / 12%) 54%,
-      transparent 62%
-    );
   }
 }
 
@@ -915,15 +910,6 @@
 .contact-section[data-contact-state='loading'] .contact-section__orbit-arc,
 .contact-section[data-contact-state='loading'] .contact-section__orbit-spark {
   opacity: 0;
-}
-
-.contact-section[data-contact-state='loading'] .contact-section__orbit::before {
-  opacity: 0;
-}
-
-.contact-section__orbit--dash-visible::before,
-.contact-section[data-contact-state='complete'] .contact-section__orbit::before {
-  opacity: 0.45;
 }
 
 .contact-section[data-contact-state='loading'] .contact-section__ambient .nw-ambient {

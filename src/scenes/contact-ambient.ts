@@ -2,7 +2,6 @@ import { Nodeweave, type NodeweaveInstance } from 'nodeweave';
 
 import { DEXSTOORE_ARCHITECTURE } from '@/scenes/dexstoore-architecture-config';
 import { NODeweave_AMBIENT_COLORS } from '@/scenes/work-architecture-integration';
-
 /** Same logical canvas as Work scenes (Nodeweave hub offsets are tuned for this space). */
 const CONTACT_AMBIENT_VIEW = {
   desktop: { width: 960, height: 720 },
@@ -69,39 +68,67 @@ function mountAmbientInstance(mount: HTMLElement): NodeweaveInstance {
 /**
  * Contact background: Nodeweave ambient layer only (same engine/options as Dexstoore/Befit Work scenes).
  */
+const noopAmbient: ContactAmbientController = {
+  enter: () => undefined,
+  leave: () => undefined,
+  destroy: () => undefined,
+};
+
 export function mountContactAmbient(section: HTMLElement | null): ContactAmbientController {
   if (!section) {
-    return { enter: () => undefined, leave: () => undefined, destroy: () => undefined };
+    return noopAmbient;
   }
 
-  const mount = document.createElement('div');
-  mount.className = 'contact-section__ambient';
-  mount.setAttribute('aria-hidden', 'true');
-  section.prepend(mount);
-
-  let instance: NodeweaveInstance | null = mountAmbientInstance(mount);
-
   const mediaQuery = window.matchMedia(DEXSTOORE_ARCHITECTURE.mobileBreakpoint);
-  const remount = (): void => {
+  let mount: HTMLDivElement | null = null;
+  let instance: NodeweaveInstance | null = null;
+
+  const teardown = (): void => {
     instance?.destroy();
-    mount.replaceChildren();
-    instance = mountAmbientInstance(mount);
+    instance = null;
+    mount?.remove();
+    mount = null;
   };
 
-  mediaQuery.addEventListener('change', remount);
+  const ensureMounted = (): void => {
+    if (mediaQuery.matches) {
+      teardown();
+      return;
+    }
+    if (!mount) {
+      mount = document.createElement('div');
+      mount.className = 'contact-section__ambient';
+      mount.setAttribute('aria-hidden', 'true');
+      section.prepend(mount);
+    }
+    if (!instance) {
+      instance = mountAmbientInstance(mount);
+    }
+  };
+
+  ensureMounted();
+
+  const onBreakpointChange = (): void => {
+    if (mediaQuery.matches) {
+      teardown();
+      return;
+    }
+    ensureMounted();
+  };
+
+  mediaQuery.addEventListener('change', onBreakpointChange);
 
   return {
     enter: () => {
+      if (mediaQuery.matches) return;
       instance?.replay();
     },
     leave: () => {
       // Nodeweave pauses its RAF loop when the SVG leaves the viewport (IntersectionObserver).
     },
     destroy: () => {
-      mediaQuery.removeEventListener('change', remount);
-      instance?.destroy();
-      instance = null;
-      mount.remove();
+      mediaQuery.removeEventListener('change', onBreakpointChange);
+      teardown();
     },
   };
 }

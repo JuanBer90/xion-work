@@ -1,6 +1,7 @@
 import { createTimeline, stagger, type Timeline } from 'animejs';
 
 import { prefersReducedMotion } from '@/utils/motion';
+import { isContactMobileViewport } from '@/utils/viewport';
 
 const CONTACT_FADE_OUT_MS = 1060;
 
@@ -29,12 +30,11 @@ function queryContactAmbient(section: HTMLElement): ContactAmbientElements | nul
   };
 }
 
-function revealContactSection(section: HTMLElement): void {
-  section.dataset.contactState = 'complete';
+function isContactOrbitReveal(el: HTMLElement): boolean {
+  return Boolean(el.closest('.contact-section__orbit'));
+}
 
-  const orbit = section.querySelector<HTMLElement>('.contact-section__orbit');
-  orbit?.classList.add('contact-section__orbit--dash-visible');
-
+function revealDecorations(section: HTMLElement): void {
   for (const path of section.querySelectorAll<SVGPathElement>('.contact-section__orbit-arc, .contact-section__orbit-spark')) {
     path.style.strokeDashoffset = '0';
     path.style.opacity = '';
@@ -46,8 +46,17 @@ function revealContactSection(section: HTMLElement): void {
     for (const dot of ambient.dots) dot.style.opacity = '';
     for (const path of ambient.paths) path.style.opacity = '';
   }
+}
+
+function revealContactSection(section: HTMLElement, options: { skipDecorations?: boolean } = {}): void {
+  section.dataset.contactState = 'complete';
+
+  if (!options.skipDecorations) {
+    revealDecorations(section);
+  }
 
   for (const el of section.querySelectorAll<HTMLElement>('[data-contact-reveal]')) {
+    if (options.skipDecorations && isContactOrbitReveal(el)) continue;
     el.style.opacity = '1';
     el.style.transform = '';
   }
@@ -55,9 +64,6 @@ function revealContactSection(section: HTMLElement): void {
 
 function clearIntroInlineStyles(section: HTMLElement): void {
   section.style.opacity = '';
-
-  const orbit = section.querySelector<HTMLElement>('.contact-section__orbit');
-  orbit?.classList.remove('contact-section__orbit--dash-visible');
 
   for (const path of section.querySelectorAll<SVGPathElement>('.contact-section__orbit-arc, .contact-section__orbit-spark')) {
     path.style.opacity = '';
@@ -100,17 +106,25 @@ export function createContactSectionIntroController(
   const copyTargets = [...section.querySelectorAll<HTMLElement>('[data-contact-reveal]')];
   const orbitArc = section.querySelector<SVGPathElement>('.contact-section__orbit-arc');
   const orbitSparks = [...section.querySelectorAll<SVGPathElement>('.contact-section__orbit-spark')];
-  const orbit = section.querySelector<HTMLElement>('.contact-section__orbit');
   const reducedMotion = prefersReducedMotion();
+  const mobileSimplified = isContactMobileViewport();
+  const skipDecorations = mobileSimplified;
+  const revealTargets = skipDecorations
+    ? copyTargets.filter((el) => !isContactOrbitReveal(el))
+    : copyTargets;
 
   if (reducedMotion) {
-    revealContactSection(section);
-    options.onRocketIdleReveal?.();
+    revealContactSection(section, { skipDecorations });
+    if (!skipDecorations) {
+      options.onRocketIdleReveal?.();
+    }
     const noop = (): void => undefined;
     return {
       play: () => {
-        revealContactSection(section);
-        options.onRocketIdleReveal?.();
+        revealContactSection(section, { skipDecorations });
+        if (!skipDecorations) {
+          options.onRocketIdleReveal?.();
+        }
       },
       reset: noop,
       stop: noop,
@@ -135,14 +149,16 @@ export function createContactSectionIntroController(
     stop();
     section.dataset.contactState = 'loading';
     clearIntroInlineStyles(section);
-    if (orbitArc) preparePaths([orbitArc]);
-    if (orbitSparks.length > 0) preparePaths(orbitSparks);
+    if (!skipDecorations) {
+      if (orbitArc) preparePaths([orbitArc]);
+      if (orbitSparks.length > 0) preparePaths(orbitSparks);
 
-    const ambient = queryContactAmbient(section);
-    if (ambient) {
-      ambient.group.style.opacity = '0';
-      for (const dot of ambient.dots) dot.style.opacity = '0';
-      for (const path of ambient.paths) path.style.opacity = '0';
+      const ambient = queryContactAmbient(section);
+      if (ambient) {
+        ambient.group.style.opacity = '0';
+        for (const dot of ambient.dots) dot.style.opacity = '0';
+        for (const path of ambient.paths) path.style.opacity = '0';
+      }
     }
   };
 
@@ -158,97 +174,85 @@ export function createContactSectionIntroController(
       },
     });
 
-    if (ambient) {
-      nextTimeline
-        .add(
-          ambient.group,
-          { opacity: { to: 1 }, duration: 420, ease: 'outQuad' },
-          0,
-        )
-        .add(
-          ambient.dots,
-          {
-            opacity: { to: 1 },
-            duration: 240,
-            delay: stagger(10, { from: 'random' }),
-            ease: 'outQuad',
-          },
-          60,
-        )
-        .add(
-          ambient.paths,
-          {
-            opacity: { to: 1 },
-            duration: 280,
-            delay: stagger(14, { from: 'random' }),
-            ease: 'outQuad',
-          },
-          120,
-        );
-    }
+    if (!skipDecorations) {
+      if (ambient) {
+        nextTimeline
+          .add(
+            ambient.group,
+            { opacity: { to: 1 }, duration: 420, ease: 'outQuad' },
+            0,
+          )
+          .add(
+            ambient.dots,
+            {
+              opacity: { to: 1 },
+              duration: 240,
+              delay: stagger(10, { from: 'random' }),
+              ease: 'outQuad',
+            },
+            60,
+          )
+          .add(
+            ambient.paths,
+            {
+              opacity: { to: 1 },
+              duration: 280,
+              delay: stagger(14, { from: 'random' }),
+              ease: 'outQuad',
+            },
+            120,
+          );
+      }
 
-    if (orbit) {
+      if (orbitArc) {
+        nextTimeline.add(
+          orbitArc,
+          {
+            strokeDashoffset: { to: 0 },
+            opacity: { to: 0.62 },
+            duration: 520,
+            ease: 'outCubic',
+          },
+          340,
+        );
+      }
+
+      if (orbitSparks.length > 0) {
+        nextTimeline.add(
+          orbitSparks,
+          {
+            strokeDashoffset: { to: 0 },
+            opacity: { to: 0.55 },
+            duration: 360,
+            delay: stagger(40),
+            ease: 'outQuad',
+          },
+          720,
+        );
+      }
+
       nextTimeline.add(
-        orbit,
+        section,
         {
           duration: 1,
           onBegin: () => {
-            orbit.classList.add('contact-section__orbit--dash-visible');
+            options.onRocketIdleReveal?.();
           },
         },
-        340,
-      );
-    }
-
-    if (orbitArc) {
-      nextTimeline.add(
-        orbitArc,
-        {
-          strokeDashoffset: { to: 0 },
-          opacity: { to: 0.62 },
-          duration: 520,
-          ease: 'outCubic',
-        },
-        380,
-      );
-    }
-
-    if (orbitSparks.length > 0) {
-      nextTimeline.add(
-        orbitSparks,
-        {
-          strokeDashoffset: { to: 0 },
-          opacity: { to: 0.55 },
-          duration: 360,
-          delay: stagger(40),
-          ease: 'outQuad',
-        },
-        720,
+        860,
       );
     }
 
     nextTimeline.add(
-      section,
+      revealTargets,
       {
-        duration: 1,
-        onBegin: () => {
-          options.onRocketIdleReveal?.();
-        },
+        opacity: { to: 1 },
+        translateY: { to: 0 },
+        duration: 440,
+        delay: stagger(42, { from: 'first' }),
       },
-      860,
+      skipDecorations ? 0 : 420,
     );
-
-    nextTimeline
-      .add(
-        copyTargets,
-        {
-          opacity: { to: 1 },
-          translateY: { to: 0 },
-          duration: 440,
-          delay: stagger(42, { from: 'first' }),
-        },
-        420,
-      );
 
     return nextTimeline;
   };

@@ -42,3 +42,11 @@
   visibility: hidden;
   filter: none;
 }
+
+@media (max-width: 760px) {
+  .contact-transmission__layer,
+  .contact-transmission__rocket,
+  .contact-transmission__rocket--viewport {
+    display: none !important;
+  }
+}
