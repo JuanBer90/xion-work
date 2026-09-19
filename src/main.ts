@@ -1,3 +1,4 @@
+import { createContactSectionIntroController } from '@/animations/contact-section-intro';
 import { initContactForm } from '@/contact/contact-form';
 import { mountContactTransmissionExperiment } from '@/contact/experiments/contact-transmission/contact-transmission';
 import { initHeroIntro } from '@/animations/hero-intro';
@@ -34,6 +35,9 @@ const befitIntro = createWorkSectionIntroController(befitSection, mountedBefitSy
 
 const contactSection = document.getElementById('contact');
 const contactTransmission = mountContactTransmissionExperiment(contactSection);
+const contactIntro = createContactSectionIntroController(contactSection, {
+  onRocketIdleReveal: () => contactTransmission.restoreIdleRocket(),
+});
 const disposeContactForm = initContactForm(contactSection, {
   onValidSubmit: () => contactTransmission.start(),
 });
@@ -45,6 +49,7 @@ const appScenes = initAppScenes({
   worldbuildHero,
   contactAmbient,
   contactTransmission,
+  contactIntro,
 });
 
 let disposeDexstooreInteraction = initWorkArchitectureInteraction(workSystemMount);

@@ -20,6 +20,7 @@ export type ContactTransmissionController = {
   start: () => void;
   complete: () => void;
   reset: () => void;
+  restoreIdleRocket: () => void;
   destroy: () => void;
 };
 
@@ -28,6 +29,7 @@ function noopController(): ContactTransmissionController {
     start: () => undefined,
     complete: () => undefined,
     reset: () => undefined,
+    restoreIdleRocket: () => undefined,
     destroy: () => undefined,
   };
 }
@@ -91,7 +93,8 @@ export function mountContactTransmissionExperiment(
     active = false;
     clearTimers();
     clearTransmissionEffects();
-    rocketLayer.setIdleAtArcStart();
+    rocketLayer.hide();
+    rocketLayer.resetRocketPlacement();
     setStage('idle');
   };
 
@@ -217,5 +220,10 @@ export function mountContactTransmissionExperiment(
     rocketLayer.destroy();
   };
 
-  return { start, complete, reset, destroy };
+  const restoreIdleRocket = (): void => {
+    if (active) return;
+    rocketLayer.setIdleAtArcStart();
+  };
+
+  return { start, complete, reset, restoreIdleRocket, destroy };
 }

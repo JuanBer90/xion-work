@@ -169,7 +169,8 @@ export function mountContactTransmissionRocket(
     setRocketInOrbit(point.x, point.y, angle, 1);
   };
 
-  setIdleAtArcStart();
+  rocketEl.style.opacity = '0';
+  rocketEl.style.visibility = 'hidden';
 
   return {
     trailPath,

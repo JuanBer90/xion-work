@@ -719,6 +719,39 @@
   }
 }
 
+.contact-section[data-contact-state='loading'] [data-contact-reveal] {
+  opacity: 0;
+  transform: translateY(0.75rem);
+}
+
+.contact-section[data-contact-state='loading'] .contact-section__orbit-arc,
+.contact-section[data-contact-state='loading'] .contact-section__orbit-spark {
+  opacity: 0;
+}
+
+.contact-section[data-contact-state='loading'] .contact-section__orbit::before {
+  opacity: 0;
+}
+
+.contact-section__orbit--dash-visible::before,
+.contact-section[data-contact-state='complete'] .contact-section__orbit::before {
+  opacity: 0.45;
+}
+
+.contact-section[data-contact-state='loading'] .contact-section__ambient .nw-ambient {
+  opacity: 0;
+}
+
+.contact-section[data-contact-state='loading'] .contact-section__ambient .nw-ambient__dot,
+.contact-section[data-contact-state='loading'] .contact-section__ambient .nw-ambient__connection {
+  opacity: 0;
+}
+
+.contact-section[data-contact-state='loading'] [data-contact-transmission-rocket] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .contact-section__orbit-arc,
   .contact-section__orbit-node {
