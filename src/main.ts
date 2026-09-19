@@ -39,7 +39,8 @@ const contactIntro = createContactSectionIntroController(contactSection, {
   onRocketIdleReveal: () => contactTransmission.restoreIdleRocket(),
 });
 const disposeContactForm = initContactForm(contactSection, {
-  onValidSubmit: () => contactTransmission.start(),
+  onValidSubmit: (payload) => contactTransmission.start(payload),
+  isSubmitInProgress: () => contactTransmission.isActive(),
 });
 const contactAmbient = mountContactAmbient(contactSection);
 

@@ -4,6 +4,7 @@ import { prefersReducedMotion } from '@/utils/motion';
 export type ContactFormPayload = {
   email: string;
   message: string;
+  website: string;
 };
 
 export type ContactSubmitState =
@@ -81,7 +82,8 @@ function showFieldValidationFailure(
 }
 
 export type InitContactFormOptions = {
-  onValidSubmit?: () => void;
+  onValidSubmit?: (payload: ContactFormPayload) => void;
+  isSubmitInProgress?: () => boolean;
 };
 
 export function initContactForm(
@@ -100,11 +102,13 @@ export function initContactForm(
   const messageSignalWrap = root.querySelector<HTMLElement>('[data-contact-message-signal-wrap]');
   const messageError = root.querySelector<HTMLElement>('[data-contact-message-error]');
   const counter = root.querySelector<HTMLElement>('[data-contact-char-count]');
+  const websiteInput = root.querySelector<HTMLInputElement>('input[name="website"]');
 
   if (
     !form ||
     !emailInput ||
     !messageInput ||
+    !websiteInput ||
     !counter ||
     !emailSignalWrap ||
     !emailError ||
@@ -146,6 +150,10 @@ export function initContactForm(
   const onSubmit = (event: SubmitEvent): void => {
     event.preventDefault();
 
+    if (options.isSubmitInProgress?.()) {
+      return;
+    }
+
     const emailMessage = getEmailValidationMessage(emailInput);
     if (emailMessage) {
       showFieldValidationFailure(emailValidationUi, emailMessage);
@@ -162,7 +170,11 @@ export function initContactForm(
 
     clearFieldValidationUi(messageValidationUi);
 
-    options.onValidSubmit?.();
+    options.onValidSubmit?.({
+      email: emailInput.value.trim(),
+      message: messageInput.value.trim(),
+      website: websiteInput.value,
+    });
   };
 
   emailInput.addEventListener('input', onEmailInput);
