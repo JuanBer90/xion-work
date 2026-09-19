@@ -1,4 +1,4 @@
-/** Deterministic simulation timings (ms). */
+/** Minimum visual stage timings (ms) while a live submit runs in parallel. */
 export const TRANSMISSION_TIMING = {
   validating: 700,
   securing: 700,

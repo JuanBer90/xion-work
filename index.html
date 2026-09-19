@@ -195,6 +195,15 @@
           <div class="contact-section__panel">
             <p class="contact-section__channel-label" data-contact-reveal>// Open a channel</p>
             <form class="contact-form" data-contact-form novalidate>
+              <input
+                class="contact-form__honeypot"
+                type="text"
+                name="website"
+                value=""
+                tabindex="-1"
+                autocomplete="off"
+                aria-hidden="true"
+              />
               <div class="contact-form__field contact-form__field--email" data-contact-reveal>
                 <label class="contact-form__label" for="contact-email">Your email</label>
                 <span class="contact-form__signal-wrap" data-contact-email-signal-wrap>
@@ -252,7 +261,7 @@
                   <span class="contact-status__live-dot" aria-hidden="true"></span>
                   Live request
                 </p>
-                <p class="contact-status__meta">// Interaction demo · No message will be sent</p>
+                <p class="contact-status__meta">// Status reflects your live submission</p>
               </div>
               <ol class="contact-status__steps">
                 <li class="contact-status__step contact-status__step--idle" data-contact-step="validating" data-contact-reveal>
@@ -286,7 +295,7 @@
               </p>
               <p class="contact-status__note" data-contact-reveal>
                 <span class="contact-status__note-icon" aria-hidden="true">i</span>
-                Interactive demo only. No message will be sent.
+                Steps update in real time while your message is sent.
               </p>
             </div>
 
