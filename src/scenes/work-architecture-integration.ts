@@ -50,14 +50,43 @@ export type ArchitectureConnectionPathContext<TId extends string = string> = {
   nodeReach: (node: ResolvedArchitectureNode<TId>) => number;
 };
 
+export type ArchitectureAmbientHub = { x: number; y: number; bias: number };
+
 export type WorkArchitectureDefinition<TId extends string = string> = {
   nodes: readonly ArchitectureNodeDefinition<TId>[];
   connections: readonly ArchitectureConnectionDefinition<TId>[];
   viewport: { desktop: { width: number; height: number }; mobile: { width: number; viewBottomPad: number; ambientBottomPad: number } };
   mobileBreakpoint: string;
-  ambient: { desktopHubs: readonly { x: number; y: number; bias: number }[]; mobileHubs: readonly { x: number; y: number; bias: number }[] };
+  ambient: { desktopHubs: readonly ArchitectureAmbientHub[]; mobileHubs: readonly ArchitectureAmbientHub[] };
   connectionPath: { desktop: (context: ArchitectureConnectionPathContext<TId>) => string; mobile: (context: ArchitectureConnectionPathContext<TId>) => string };
 };
+
+export const NODeweave_AMBIENT_COLORS = [
+  'var(--cyan)',
+  'var(--blue)',
+  'var(--green)',
+  'var(--orange)',
+  'var(--violet)',
+  'var(--red)',
+  'var(--yellow)',
+] as const;
+
+/** Shared Nodeweave ambient config used by Work architecture scenes (and Contact background). */
+export function buildNodeweaveAmbientOptions(
+  viewWidth: number,
+  mobile: boolean,
+  ambient: WorkArchitectureDefinition['ambient'],
+) {
+  return {
+    enabled: true as const,
+    count: mobile ? 380 : window.matchMedia('(max-width: 1050px)').matches ? 720 : 1280,
+    colors: [...NODeweave_AMBIENT_COLORS],
+    hubs: mobile ? [...ambient.mobileHubs] : [...ambient.desktopHubs],
+    reach: viewWidth < 500 ? 34 : 38,
+    movement: true as const,
+    speed: 0.00065,
+  };
+}
 
 export type MountedWorkArchitecture = {
   instance: NodeweaveInstance;
@@ -152,15 +181,7 @@ function mountWorkArchitecture<TId extends string>(container: HTMLElement, defin
         return path({ connection: definition.connections.find((entry) => entry.id === context.connection.id)!, from, to, anchors: context.anchors, nodeReach: (node) => node.visual.spread * 0.42 });
       },
     })),
-    ambient: {
-      enabled: true,
-      count: mobile ? 380 : window.matchMedia('(max-width: 1050px)').matches ? 720 : 1280,
-      colors: ['var(--cyan)', 'var(--blue)', 'var(--green)', 'var(--orange)', 'var(--violet)', 'var(--red)', 'var(--yellow)'],
-      hubs: mobile ? definition.ambient.mobileHubs : definition.ambient.desktopHubs,
-      reach: viewWidth < 500 ? 34 : 38,
-      movement: true,
-      speed: 0.00065,
-    },
+    ambient: buildNodeweaveAmbientOptions(viewWidth, mobile, definition.ambient),
     animation: { enabled: false, respectReducedMotion: true },
     interaction: { drag: { enabled: true, bounds: 'container' } },
   });

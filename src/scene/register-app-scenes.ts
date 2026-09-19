@@ -1,4 +1,5 @@
 import type { WorkSectionIntroController } from '@/animations/work-section-intro';
+import type { ContactAmbientController } from '@/scenes/contact-ambient';
 import type { WorldbuildHeroController } from '@/scenes/worldbuild-hero';
 
 import { createScene } from './create-scene.ts';
@@ -32,6 +33,7 @@ export type InitAppScenesOptions = {
   dexstooreIntro?: WorkSectionIntroController | null;
   befitIntro?: WorkSectionIntroController | null;
   worldbuildHero?: WorldbuildHeroController | null;
+  contactAmbient?: ContactAmbientController | null;
 };
 
 export function createHeroScene(worldbuildHero: WorldbuildHeroController | null = null): Scene | null {
@@ -72,11 +74,36 @@ export function createBefitScene(intro: WorkSectionIntroController | null): Scen
   });
 }
 
+export function createContactScene(
+  contactAmbient: ContactAmbientController | null = null,
+): Scene | null {
+  const element = document.getElementById('contact');
+  if (!element) return null;
+
+  return createScene({
+    id: 'contact',
+    element,
+    lifecycle: {
+      enter: () => {
+        contactAmbient?.enter();
+      },
+      leave: () => {
+        contactAmbient?.leave();
+      },
+      reset: noop,
+      destroy: () => {
+        contactAmbient?.destroy();
+      },
+    },
+  });
+}
+
 export function initAppScenes(options: InitAppScenesOptions = {}): SceneScrollController {
   const scenes = [
     createHeroScene(options.worldbuildHero ?? null),
     createDexstooreScene(options.dexstooreIntro ?? null),
     createBefitScene(options.befitIntro ?? null),
+    createContactScene(options.contactAmbient ?? null),
   ].filter((scene): scene is Scene => scene !== null);
   return initSceneScrollController(scenes);
 }
