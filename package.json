@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "animejs": "4.5.0",
+    "nodeweave": "0.1.0",
     "worldbuild-js": "^0.1.0"
   }
 }

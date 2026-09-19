@@ -1,9 +1,8 @@
-import { architectureConnectionAnchors } from '@/work-architecture/connection-anchors.ts';
 import type {
   ArchitectureConnectionPathContext,
   ArchitectureNodeVisualSpec,
   WorkArchitectureDefinition,
-} from '@/work-architecture/types.ts';
+} from './work-architecture-integration.ts';
 
 export type BefitNodeId =
   | 'befit-core'
@@ -97,11 +96,12 @@ const NODE_VISUALS: Record<BefitNodeId, ArchitectureNodeVisualSpec> = {
 
 function befitDesktopConnectionPath({
   connection,
+  anchors,
   from,
   to,
-  nodeReach,
 }: ArchitectureConnectionPathContext<BefitNodeId>): string {
-  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
+  const { start, end } = anchors;
+  const startX = start.x; const startY = start.y; const endX = end.x; const endY = end.y;
   const upward = to.y < from.y;
 
   switch (connection.id) {
@@ -124,11 +124,12 @@ function befitDesktopConnectionPath({
 
 function befitMobileConnectionPath({
   connection,
+  anchors,
   from,
   to,
-  nodeReach,
 }: ArchitectureConnectionPathContext<BefitNodeId>): string {
-  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
+  const { start, end } = anchors;
+  const startX = start.x; const startY = start.y; const endX = end.x; const endY = end.y;
   const midY = (startY + endY) / 2;
   const upward = to.y < from.y;
 

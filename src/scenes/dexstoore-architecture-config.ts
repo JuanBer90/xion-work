@@ -1,9 +1,8 @@
-import { architectureConnectionAnchors } from '@/work-architecture/connection-anchors.ts';
 import type {
   ArchitectureConnectionPathContext,
   ArchitectureNodeVisualSpec,
   WorkArchitectureDefinition,
-} from '@/work-architecture/types.ts';
+} from './work-architecture-integration.ts';
 
 export type DexstooreNodeId =
   | 'storefront'
@@ -100,11 +99,12 @@ const MOBILE_COMMERCE_API_SHIFT_X = Math.round(50 * (MOBILE_VIEW_WIDTH / 390));
 
 function dexstooreDesktopConnectionPath({
   connection,
+  anchors,
   from,
   to,
-  nodeReach,
 }: ArchitectureConnectionPathContext<DexstooreNodeId>): string {
-  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
+  const { start, end } = anchors;
+  const startX = start.x; const startY = start.y; const endX = end.x; const endY = end.y;
 
   switch (connection.id) {
     case 'storefront-commerce-api':
@@ -128,11 +128,12 @@ function dexstooreDesktopConnectionPath({
 
 function dexstooreMobileConnectionPath({
   connection,
+  anchors,
   from,
   to,
-  nodeReach,
 }: ArchitectureConnectionPathContext<DexstooreNodeId>): string {
-  const { startX, startY, endX, endY } = architectureConnectionAnchors(from, to, nodeReach);
+  const { start, end } = anchors;
+  const startX = start.x; const startY = start.y; const endX = end.x; const endY = end.y;
   const midY = (startY + endY) / 2;
 
   switch (connection.id) {

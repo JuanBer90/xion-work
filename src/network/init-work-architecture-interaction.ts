@@ -1,11 +1,11 @@
 function isWorkNodeHit(target: EventTarget | null): SVGRectElement | null {
   if (!(target instanceof Element)) return null;
-  const hit = target.closest<SVGRectElement>('.work-node-hit');
+  const hit = target.closest<SVGRectElement>('.nw-node__hit');
   return hit ?? null;
 }
 
 function nodeIdFromHit(hit: SVGRectElement): string | null {
-  const id = hit.closest<SVGGElement>('.work-node-group')?.dataset.workNode;
+  const id = hit.closest<SVGGElement>('.work-node-group')?.dataset.nodeweaveNode;
   return id ?? null;
 }
 
@@ -13,14 +13,17 @@ function nodeIdFromHit(hit: SVGRectElement): string | null {
 export function initWorkArchitectureInteraction(
   systemRoot: HTMLElement | null,
 ): () => void {
-  const svg = systemRoot?.querySelector<SVGSVGElement>('.work-system__svg');
+  const svg = systemRoot?.querySelector<SVGSVGElement>('.nodeweave');
   if (!svg) return () => undefined;
 
-  const hits = [...svg.querySelectorAll<SVGRectElement>('.work-node-hit')];
-  const interactives = hits.map(
-    (hit) =>
-      hit.parentElement?.querySelector<SVGGElement>('.work-node__interactive') ?? null,
-  );
+  const hits = [...svg.querySelectorAll<SVGRectElement>('.nw-node__hit')];
+  const interactives = hits.flatMap((hit) => {
+    const group = hit.closest<SVGGElement>('.work-node-group');
+    return [
+      group?.querySelector<SVGGElement>('.nw-node__visual'),
+      group?.querySelector<SVGGElement>('.nw-node__labels'),
+    ].filter((element): element is SVGGElement => element !== null && element !== undefined);
+  });
 
   let hoveredId: string | null = null;
   let focusedId: string | null = null;
@@ -29,7 +32,7 @@ export function initWorkArchitectureInteraction(
     const activeId = hoveredId ?? focusedId;
     for (const interactive of interactives) {
       if (!interactive) continue;
-      const id = interactive.closest<SVGGElement>('.work-node-group')?.dataset.workNode;
+      const id = interactive.closest<SVGGElement>('.work-node-group')?.dataset.nodeweaveNode;
       interactive.classList.toggle('work-node--engaged', id !== undefined && id === activeId);
     }
   };
@@ -80,7 +83,7 @@ export function initWorkArchitectureInteraction(
     hoveredId = null;
     focusedId = null;
     for (const interactive of interactives) {
-      interactive?.classList.remove('work-node--engaged');
+      interactive.classList.remove('work-node--engaged');
     }
   };
 }
